@@ -29,7 +29,7 @@ def main():
     )
 
     parser = argparse.ArgumentParser(description="Daily Audio Digest")
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command")
 
     # generate
     gen = sub.add_parser("generate", help="Generate an audio pack")
@@ -45,6 +45,9 @@ def main():
     srv.set_defaults(func=cmd_serve)
 
     args = parser.parse_args()
+    if args.command is None:
+        # Default: serve --debug
+        args = srv.parse_args(["--debug"])
     args.func(args)
 
 

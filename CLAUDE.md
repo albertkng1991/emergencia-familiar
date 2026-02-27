@@ -11,11 +11,15 @@ backend/           Python 3.12 — Flask API + pipeline
   scriptwriter/    LLM-generated dialogue scripts (GPT-4o)
   tts/             Text-to-speech (Gemini multi-speaker)
   packs/           Pipeline orchestrator: research → script → audio → pack
-  storage/         SQLAlchemy models + DB session
+  storage/         SQLAlchemy models + DB session (thread-safe, SQLite/PostgreSQL)
   api/             Flask REST API (serves packs + audio)
+  dashboard/       API key management + health endpoint
+    data/          api_keys_config.json (key metadata)
+    routes/        Flask blueprints (keys, health)
+    services/      env_manager, key_tester
 
 frontend/          TypeScript + React 19 + Vite + Tailwind
-  src/components/  PackList, PackPlayer, StoryCard
+  src/components/  PackList, PackPlayer, StoryCard, SettingsPage, StatusDot
   src/hooks/       usePackPlayer (audio playback state)
   src/api/         API client
   src/types/       Shared TypeScript types
@@ -24,11 +28,20 @@ frontend/          TypeScript + React 19 + Vite + Tailwind
 ## Commands
 
 ```bash
+# Dev (recommended)
+make dev                             # Flask (5000) + Vite (5173) in parallel
+make install                         # pip install + npm install
+make lint                            # Lint both stacks
+make format                          # Format both stacks
+make build                           # Build frontend
+
 # Backend
 ruff check backend/                  # Lint Python
 ruff format backend/                 # Format Python
 ruff check --fix backend/            # Auto-fix lint issues
-python -m backend                    # Run backend (Flask dev server)
+python -m backend                    # Run backend (Flask dev server, --debug default)
+python -m backend serve              # Explicit serve
+python -m backend generate           # Generate a pack
 
 # Frontend
 cd frontend
@@ -38,6 +51,19 @@ npm run format                       # Prettier format
 npm run format:check                 # Prettier check (CI)
 npm run dev                          # Vite dev server
 npm run build                        # TypeScript check + Vite build
+```
+
+## API Endpoints
+
+```
+GET  /api/packs              List all packs
+GET  /api/packs/<id>         Get pack with stories
+POST /api/packs/generate     Generate new pack
+GET  /audio/<filename>       Serve audio file
+GET  /api/keys               API keys (masked values)
+POST /api/keys               Save API keys to .env
+POST /api/keys/test          Test one or all API keys
+GET  /api/health             System health status
 ```
 
 ## Code Conventions

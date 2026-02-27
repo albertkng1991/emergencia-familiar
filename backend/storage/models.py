@@ -15,17 +15,19 @@ class Pack(Base):
     id = Column(Integer, primary_key=True)
     topic = Column(String(100), nullable=False)
     date = Column(String(10), nullable=False)  # YYYY-MM-DD
+    pack_type = Column(String(10), nullable=False, default="daily")  # "daily" or "weekly"
     status = Column(String(20), nullable=False, default="generating")
     total_duration = Column(Float, default=0.0)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     stories = relationship("Story", back_populates="pack", order_by="Story.position")
 
-    def to_dict(self, include_stories=False):
+    def to_dict(self, include_stories=False, preview=False):
         d = {
             "id": self.id,
             "topic": self.topic,
             "date": self.date,
+            "pack_type": self.pack_type or "daily",
             "status": self.status,
             "total_duration": self.total_duration,
             "created_at": self.created_at.isoformat() if self.created_at else None,
@@ -33,6 +35,19 @@ class Pack(Base):
         }
         if include_stories:
             d["stories"] = [s.to_dict() for s in self.stories]
+        elif preview:
+            d["stories"] = [
+                {
+                    "id": s.id,
+                    "position": s.position,
+                    "headline": s.headline,
+                    "summary": s.summary or "",
+                    "source_count": len(json.loads(s.source_urls)) if s.source_urls else 0,
+                    "duration": s.duration,
+                    "audio_url": f"/audio/{s.audio_filename}" if s.audio_filename else None,
+                }
+                for s in self.stories
+            ]
         return d
 
 
@@ -53,13 +68,15 @@ class Story(Base):
     pack = relationship("Pack", back_populates="stories")
 
     def to_dict(self):
+        urls = json.loads(self.source_urls) if self.source_urls else []
         return {
             "id": self.id,
             "pack_id": self.pack_id,
             "position": self.position,
             "headline": self.headline,
             "summary": self.summary,
-            "source_urls": json.loads(self.source_urls) if self.source_urls else [],
+            "source_urls": urls,
+            "source_count": len(urls),
             "script": self.script,
             "audio_filename": self.audio_filename,
             "audio_url": f"/audio/{self.audio_filename}" if self.audio_filename else None,

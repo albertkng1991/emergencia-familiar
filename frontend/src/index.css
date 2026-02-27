@@ -1,3 +1,175 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── CSS custom properties ─────────────────────── */
+:root {
+  --color-muted: #f4f0f0;
+  --color-primary: #d32222;
+  --color-surface: #ffffff;
+}
+
+/* ── Button components ─────────────────────────── */
+@layer components {
+  /* Pill buttons (date pills, topic chips) */
+  .btn-pill {
+    @apply shrink-0 rounded-full text-sm font-medium transition-colors;
+  }
+  .btn-pill-primary {
+    @apply btn-pill bg-primary text-white;
+  }
+  .btn-pill-muted {
+    @apply btn-pill bg-muted text-text-secondary hover:bg-muted-hover;
+  }
+  .btn-pill-outline {
+    @apply btn-pill border border-border-strong text-text-secondary hover:bg-muted;
+  }
+
+  /* Block buttons (CTAs) */
+  .btn-block-primary {
+    @apply w-full rounded-lg bg-primary text-white py-3 font-semibold;
+  }
+  .btn-block-ghost {
+    @apply w-full rounded-lg border border-border text-text-secondary hover:bg-hover py-2.5;
+  }
+
+  /* Toggle buttons (AM/PM) */
+  .btn-toggle-active {
+    @apply rounded-md bg-primary text-white;
+  }
+  .btn-toggle-inactive {
+    @apply rounded-md bg-muted text-text-secondary;
+  }
+
+  /* Branding */
+  .brand-accent {
+    background: linear-gradient(90deg, #d32222, #ea580c, #db2777);
+  }
+
+  .card-warm {
+    @apply bg-white rounded-lg shadow-warm hover:shadow-warm-md hover:border-muted-hover transition-all;
+    border: 1px solid #f4f0f0;
+  }
+}
+
+/* ── Scrollbar hide ─────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ── Marquee animation ──────────────────────────── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 12s linear infinite;
+}
+
+/* ── Equalizer animation (compositor-only via scaleY) ── */
+@keyframes eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-eq-1,
+.animate-eq-2,
+.animate-eq-3 {
+  height: 16px;
+  transform-origin: bottom;
+  will-change: transform;
+}
+
+.animate-eq-1 {
+  animation: eq-bar 0.5s ease-in-out infinite;
+}
+.animate-eq-2 {
+  animation: eq-bar 0.5s ease-in-out 0.12s infinite;
+}
+.animate-eq-3 {
+  animation: eq-bar 0.5s ease-in-out 0.24s infinite;
+}
+
+/* ── Range slider ───────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-muted);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  margin-top: -8px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 1px 3px rgba(32, 18, 18, 0.15);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--color-muted);
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 1px 3px rgba(32, 18, 18, 0.15);
+}
+
+/* ── Badge pop animation ───────────────────────── */
+@keyframes badge-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.3s ease-out;
+}
+
+/* ── Reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-eq-1,
+  .animate-eq-2,
+  .animate-eq-3,
+  .animate-badge-pop {
+    animation: none;
+  }
+}

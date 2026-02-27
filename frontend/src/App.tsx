@@ -1,18 +1,30 @@
 import { Route, Routes } from "react-router-dom";
-import PackList from "./components/PackList";
-import PackPlayer from "./components/PackPlayer";
+import BottomNav from "./components/BottomNav";
+import Escuchados from "./components/Escuchados";
+import FlyAnimationLayer from "./components/FlyAnimationLayer";
+import FullPlayer from "./components/FullPlayer";
+import HomeDaily from "./components/HomeDaily";
+import MiniPlayer from "./components/MiniPlayer";
+import SettingsPage from "./components/SettingsPage";
+import { AudioProvider } from "./contexts/AudioContext";
+import { QueueProvider } from "./contexts/QueueContext";
 
 export default function App() {
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Daily Audio Digest</h1>
-        <p className="text-gray-400 text-sm mt-1">Tu briefing diario de noticias en audio</p>
-      </header>
-      <Routes>
-        <Route path="/" element={<PackList />} />
-        <Route path="/pack/:id" element={<PackPlayer />} />
-      </Routes>
-    </div>
+    <AudioProvider>
+      <QueueProvider>
+        <div className="relative max-w-md mx-auto min-h-dvh bg-white shadow-warm-lg">
+          <Routes>
+            <Route path="/" element={<HomeDaily />} />
+            <Route path="/escuchados" element={<Escuchados />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+          <MiniPlayer />
+          <BottomNav />
+          <FullPlayer />
+          <FlyAnimationLayer />
+        </div>
+      </QueueProvider>
+    </AudioProvider>
   );
 }
