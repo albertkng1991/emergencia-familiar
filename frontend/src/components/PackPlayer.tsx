@@ -44,9 +44,7 @@ export default function PackPlayer() {
   }
 
   const totalProgress =
-    player.totalDuration > 0
-      ? (player.totalElapsed / player.totalDuration) * 100
-      : 0;
+    player.totalDuration > 0 ? (player.totalElapsed / player.totalDuration) * 100 : 0;
 
   return (
     <div>
@@ -85,8 +83,7 @@ export default function PackPlayer() {
         <div className="flex justify-between text-xs text-gray-500 mb-1">
           <span>Pack</span>
           <span>
-            {formatDuration(player.totalElapsed)} /{" "}
-            {formatDuration(player.totalDuration)}
+            {formatDuration(player.totalElapsed)} / {formatDuration(player.totalDuration)}
           </span>
         </div>
         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">

@@ -5,7 +5,6 @@ Each script is a ~300-word dialogue between Host A and Host B in Spanish.
 Format: "Host A: ..." / "Host B: ..." (required by Gemini TTS multi-speaker).
 """
 
-import json
 import logging
 
 from openai import OpenAI

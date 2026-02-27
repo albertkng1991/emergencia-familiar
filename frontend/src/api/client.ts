@@ -13,10 +13,7 @@ export async function fetchPack(id: number): Promise<Pack> {
   return res.json();
 }
 
-export async function generatePack(
-  topic: string = "IA",
-  count: number = 5
-): Promise<Pack> {
+export async function generatePack(topic: string = "IA", count: number = 5): Promise<Pack> {
   const res = await fetch("/api/packs/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

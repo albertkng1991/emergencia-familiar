@@ -13,15 +13,8 @@ interface StoryCardProps {
   onClick: () => void;
 }
 
-export default function StoryCard({
-  story,
-  isActive,
-  currentTime,
-  onClick,
-}: StoryCardProps) {
-  const progress = isActive && story.duration > 0
-    ? (currentTime / story.duration) * 100
-    : 0;
+export default function StoryCard({ story, isActive, currentTime, onClick }: StoryCardProps) {
+  const progress = isActive && story.duration > 0 ? (currentTime / story.duration) * 100 : 0;
 
   return (
     <button
@@ -35,25 +28,17 @@ export default function StoryCard({
       <div className="flex items-center gap-3">
         <span
           className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-            isActive
-              ? "bg-blue-600 text-white"
-              : "bg-gray-800 text-gray-400"
+            isActive ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400"
           }`}
         >
           {story.position}
         </span>
         <div className="flex-1 min-w-0">
-          <p
-            className={`font-medium truncate ${
-              isActive ? "text-white" : "text-gray-300"
-            }`}
-          >
+          <p className={`font-medium truncate ${isActive ? "text-white" : "text-gray-300"}`}>
             {story.headline}
           </p>
           {story.summary && (
-            <p className="text-gray-500 text-sm mt-0.5 truncate">
-              {story.summary}
-            </p>
+            <p className="text-gray-500 text-sm mt-0.5 truncate">{story.summary}</p>
           )}
         </div>
         <span className="text-gray-500 text-sm flex-shrink-0">

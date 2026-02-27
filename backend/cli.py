@@ -5,7 +5,6 @@ CLI entry point: python -m backend.cli generate --topic "IA"
 import argparse
 import json
 import logging
-import sys
 
 
 def cmd_generate(args):

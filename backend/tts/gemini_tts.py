@@ -5,9 +5,7 @@ Takes a script with "Host A:" / "Host B:" lines and produces an MP3 file
 with two distinct voices using Google's Gemini TTS API.
 """
 
-import base64
 import logging
-import struct
 import subprocess
 import wave
 from pathlib import Path
@@ -15,7 +13,7 @@ from pathlib import Path
 from google import genai
 from google.genai import types
 
-from backend.config.settings import AUDIO_DIR, GOOGLE_AI_API_KEY, TTS_VOICE_A, TTS_VOICE_B
+from backend.config.settings import GOOGLE_AI_API_KEY, TTS_VOICE_A, TTS_VOICE_B
 
 logger = logging.getLogger(__name__)
 

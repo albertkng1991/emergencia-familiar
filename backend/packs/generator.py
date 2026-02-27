@@ -6,7 +6,7 @@ research → scriptwriter → TTS → save to DB
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from backend.config.settings import AUDIO_DIR
 from backend.research.researcher import find_trending_topics
@@ -33,7 +33,7 @@ def generate_pack(topic: str = "IA", story_count: int = 5) -> dict:
     init_db()
     session = get_session()
 
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     pack = Pack(topic=topic, date=today, status="generating")
     session.add(pack)

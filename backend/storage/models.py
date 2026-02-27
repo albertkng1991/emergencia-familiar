@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, relationship
@@ -17,7 +17,7 @@ class Pack(Base):
     date = Column(String(10), nullable=False)  # YYYY-MM-DD
     status = Column(String(20), nullable=False, default="generating")
     total_duration = Column(Float, default=0.0)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     stories = relationship("Story", back_populates="pack", order_by="Story.position")
 
@@ -48,7 +48,7 @@ class Story(Base):
     script = Column(Text, default="")
     audio_filename = Column(String(200), default="")
     duration = Column(Float, default=0.0)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     pack = relationship("Pack", back_populates="stories")
 

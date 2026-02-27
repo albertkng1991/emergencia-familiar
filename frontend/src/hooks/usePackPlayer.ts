@@ -34,9 +34,8 @@ export function usePackPlayer(stories: Story[]) {
     const onTimeUpdate = () => {
       setState((prev) => {
         const elapsed =
-          stories
-            .slice(0, prev.currentIndex)
-            .reduce((sum, s) => sum + s.duration, 0) + audio.currentTime;
+          stories.slice(0, prev.currentIndex).reduce((sum, s) => sum + s.duration, 0) +
+          audio.currentTime;
         return {
           ...prev,
           currentTime: audio.currentTime,
@@ -98,7 +97,7 @@ export function usePackPlayer(stories: Story[]) {
 
       audio.play();
     },
-    [stories, state.currentIndex]
+    [stories, state.currentIndex],
   );
 
   const pause = useCallback(() => {
@@ -125,15 +124,12 @@ export function usePackPlayer(stories: Story[]) {
     }
   }, [state.currentIndex, stories.length, play]);
 
-  const skip = useCallback(
-    (seconds: number) => {
-      const audio = audioRef.current;
-      if (audio) {
-        audio.currentTime = Math.max(0, Math.min(audio.currentTime + seconds, audio.duration || 0));
-      }
-    },
-    []
-  );
+  const skip = useCallback((seconds: number) => {
+    const audio = audioRef.current;
+    if (audio) {
+      audio.currentTime = Math.max(0, Math.min(audio.currentTime + seconds, audio.duration || 0));
+    }
+  }, []);
 
   return {
     ...state,

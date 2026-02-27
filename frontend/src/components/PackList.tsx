@@ -66,9 +66,7 @@ export default function PackList() {
       {loading ? (
         <p className="text-gray-500 text-center py-12">Cargando...</p>
       ) : packs.length === 0 ? (
-        <p className="text-gray-500 text-center py-12">
-          No hay packs todavia. Genera el primero!
-        </p>
+        <p className="text-gray-500 text-center py-12">No hay packs todavia. Genera el primero!</p>
       ) : (
         <div className="space-y-3">
           {packs.map((pack) => (
@@ -80,14 +78,10 @@ export default function PackList() {
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-white font-medium">{pack.topic}</span>
-                  <span className="text-gray-500 text-sm ml-3">
-                    {pack.date}
-                  </span>
+                  <span className="text-gray-500 text-sm ml-3">{pack.date}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-400 text-sm">
-                    {pack.story_count} noticias
-                  </span>
+                  <span className="text-gray-400 text-sm">{pack.story_count} noticias</span>
                   {pack.total_duration > 0 && (
                     <span className="text-gray-500 text-sm">
                       {formatDuration(pack.total_duration)}
@@ -98,8 +92,8 @@ export default function PackList() {
                       pack.status === "ready"
                         ? "bg-green-900/50 text-green-400"
                         : pack.status === "generating"
-                        ? "bg-yellow-900/50 text-yellow-400"
-                        : "bg-red-900/50 text-red-400"
+                          ? "bg-yellow-900/50 text-yellow-400"
+                          : "bg-red-900/50 text-red-400"
                     }`}
                   >
                     {pack.status}

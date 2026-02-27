@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load .env from project root
@@ -47,9 +48,26 @@ RSS_FEEDS = [
     "https://www.technologyreview.com/feed/",
 ]
 TRENDS_KEYWORDS = [
-    "AI", "GPT", "robot", "tech", "app", "Google", "Apple", "Meta",
-    "Microsoft", "Samsung", "Tesla", "chip", "quantum", "cyber",
-    "cloud", "data", "neural", "OpenAI", "startup", "software",
+    "AI",
+    "GPT",
+    "robot",
+    "tech",
+    "app",
+    "Google",
+    "Apple",
+    "Meta",
+    "Microsoft",
+    "Samsung",
+    "Tesla",
+    "chip",
+    "quantum",
+    "cyber",
+    "cloud",
+    "data",
+    "neural",
+    "OpenAI",
+    "startup",
+    "software",
 ]
 
 # --- TTS ---
