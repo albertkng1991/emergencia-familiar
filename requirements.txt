@@ -1,0 +1,14 @@
+# Backend
+flask>=3.1
+flask-cors>=5.0
+python-dotenv>=1.0
+sqlalchemy>=2.0
+openai>=1.60
+google-genai>=1.0
+feedparser>=6.0
+requests>=2.32
+praw>=7.8
+pytrends>=4.9
+
+# Audio
+pydub>=0.25
