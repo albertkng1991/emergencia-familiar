@@ -1,161 +1,121 @@
 # Daily Audio Digest
 
-Diario audible de noticias: packs de 5 noticias diarias resumidas en píldoras de ~2 minutos cada una. Le das play a un pack y escuchas ~10 minutos de podcast explicándote las noticias del día.
+Diario audible de noticias: packs de 5 noticias diarias resumidas en diálogos de ~2 minutos cada una entre dos hosts con voces distintas. Le das play a un pack y escuchas ~10 minutos de podcast explicándote las noticias del día.
 
 ---
 
 ## Concepto
 
-- Cada mañana (o bajo demanda) el sistema busca las noticias más relevantes de un tema (ej: IA, tech, crypto).
-- Selecciona las 5 mejores, genera un guión hablado de ~2 min por noticia, y lo convierte a audio con voz natural.
-- El usuario abre la app, ve el pack del día, le da play, y escucha las 5 noticias seguidas como un mini-podcast.
-- UI tipo reproductor: muestra qué noticia suena, progreso dentro de ella, y progreso del pack completo.
+- Cada mañana el sistema busca las 5 noticias más relevantes de un tema (IA, tech, crypto...).
+- Para cada noticia genera un guión de diálogo entre dos hosts (~300 palabras = ~2 min).
+- Convierte cada guión a audio multi-voz con un servicio TTS (caja negra).
+- El usuario abre la app, ve el pack del día, le da play, y escucha las 5 como un mini-podcast.
 
 ---
 
-## 4 Ideas de implementación
+## TTS multi-voz: opciones caja negra
 
-### Idea 1: Monolito Python + Web App React (MVP rápido)
+### Opción A: ElevenLabs Text-to-Dialogue API (recomendada)
 
-**Stack:** Python backend (Flask/FastAPI) + React frontend + ElevenLabs TTS
+Endpoint dedicado para diálogo multi-voz. Le pasas una lista de turnos con voice_id y texto, y devuelve un único .mp3 con la conversación completa. No hay que mergear nada.
 
 ```
-Cron diario (o manual)
-  └─> Research (reutilizar módulo de ig-pipeline: RSS, Reddit, NewsAPI, Google Trends)
-  └─> Para cada noticia:
-        └─> GPT-4o genera guión hablado (~300 palabras = ~2 min)
-        └─> ElevenLabs TTS genera .mp3
-  └─> Empaqueta en un "pack" (JSON metadata + 5 mp3s)
-  └─> Sirve via API
-
-React SPA
-  └─> GET /api/packs (lista de packs por fecha)
-  └─> GET /api/packs/:id (metadata + URLs de audio)
-  └─> Reproductor HTML5 Audio con controles de pack
+POST /v1/text-to-dialogue
+{
+  "dialogue": [
+    {"voice_id": "voz-host-A", "text": "[entusiasmado] Hoy tenemos una noticia brutal sobre OpenAI..."},
+    {"voice_id": "voz-host-B", "text": "Sí, y lo más interesante es que..."},
+    {"voice_id": "voz-host-A", "text": "[laughing] Exacto, nadie se lo esperaba."}
+  ]
+}
+→ Devuelve audio .mp3
 ```
 
-**Pros:** Rápido de construir, reutiliza research de ig-pipeline, hosting simple (Cloud Run).
-**Contras:** ElevenLabs tiene coste por carácter (~$5/mes para 5 noticias/día con plan Creator).
+- Modelo: Eleven v3 (el más expresivo, interpreta emoción del texto)
+- Soporta audio tags: `[laughing]`, `[sigh]`, `[cautiously]`, `[whispering]`
+- Hasta 10 voces únicas por diálogo, turnos ilimitados
+- 70+ idiomas, incluido español
+- Coste: ~$5/mes plan Creator (100k chars), ~$22/mes plan Scale (500k chars)
+- 5 noticias × 300 palabras × 5 chars/palabra = ~7.500 chars/día → ~225k/mes → plan Scale
 
-**Coste estimado:** ~$5-11/mes (ElevenLabs Creator $5 + GPT-4o ~$1 + Cloud Run ~$5)
+### Opción B: Gemini 2.5 Flash/Pro TTS (más barata)
+
+Google Gemini tiene TTS multi-speaker nativo. Le pasas el texto con nombres de speaker y configuras una voz por cada uno.
+
+```
+POST /v1/models/gemini-2.5-flash-preview-tts:generateContent
+{
+  "contents": [{"parts": [{"text": "Host A: Hoy tenemos... Host B: Sí, lo más interesante..."}]}],
+  "generationConfig": {
+    "responseModalities": ["AUDIO"],
+    "speechConfig": {
+      "multiSpeakerVoiceConfig": {
+        "speakerVoiceConfigs": [
+          {"speaker": "Host A", "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Kore"}}},
+          {"speaker": "Host B", "voiceConfig": {"prebuiltVoiceConfig": {"voiceName": "Puck"}}}
+        ]
+      }
+    }
+  }
+}
+→ Devuelve audio inline (base64)
+```
+
+- Modelos: Gemini 2.5 Flash TTS (rápido, barato) o Pro TTS (más calidad)
+- Hasta 2 speakers por request
+- Coste: ~$0.02-0.04/minuto de audio → ~$0.20/día → ~$6/mes
+- Tiene free tier generoso para desarrollo
+- Menos expresivo que ElevenLabs pero funcional
+
+### Decisión
+
+**ElevenLabs** si queremos calidad podcast real (expresividad, risas, pausas naturales).
+**Gemini** si queremos minimizar costes y ya usamos Google Cloud.
+
+→ Empezar con **Gemini** (gratis para prototipar) y evaluar si la calidad es suficiente. Si no, saltar a ElevenLabs.
 
 ---
 
-### Idea 2: Pipeline serverless con Cloud Functions + Storage
-
-**Stack:** Cloud Functions (Python) + Cloud Storage (audio) + Cloud Scheduler + frontend estático
-
-```
-Cloud Scheduler (8:00 AM)
-  └─> Trigger Cloud Function "generate-pack"
-        └─> Research noticias
-        └─> Genera guiones con GPT-4o
-        └─> TTS con Google Cloud Text-to-Speech (más barato que ElevenLabs)
-        └─> Sube .mp3 a Cloud Storage (bucket público)
-        └─> Guarda metadata en Firestore/PostgreSQL
-
-Frontend (hosting estático en Cloud Storage o Vercel)
-  └─> Fetch metadata, reproduce audio directo desde Storage URLs
-```
-
-**Pros:** Muy barato (Google TTS = $4/1M caracteres, ~$0.10/día), serverless = sin servidor 24/7.
-**Contras:** Google TTS suena menos natural que ElevenLabs. Más piezas que orquestar.
-
-**Coste estimado:** ~$2-5/mes total
-
----
-
-### Idea 3: App nativa móvil (React Native / Expo)
-
-**Stack:** Backend igual que Idea 1, pero frontend como app móvil
-
-```
-Backend API (Cloud Run)
-  └─> Mismo pipeline de research + guión + TTS
-  └─> API REST serviendo packs y audio
-
-App móvil (React Native + Expo)
-  └─> Notificación push matutina: "Tu briefing de hoy está listo"
-  └─> Reproductor tipo Spotify/podcast
-  └─> Reproducción en background, control desde lock screen
-  └─> Descarga offline de packs
-```
-
-**Pros:** Experiencia premium, notificaciones, reproducción en background, potencial para monetizar.
-**Contras:** Más desarrollo, App Store/Play Store, mantenimiento de dos plataformas.
-
----
-
-### Idea 4: Sistema multi-voz tipo "mesa redonda"
-
-**Stack:** Backend Python + múltiples voces ElevenLabs + React frontend
-
-```
-Pipeline:
-  └─> Research noticias
-  └─> GPT-4o genera guión con 2 "hosts" (diálogo, no monólogo)
-        Host A: presenta la noticia, datos clave
-        Host B: da contexto, opinión, pregunta retórica
-  └─> ElevenLabs con 2 voces diferentes
-  └─> Merge de audios en un solo mp3 por noticia (con pydub/ffmpeg)
-  └─> Crossfade + jingle entre noticias
-
-Frontend:
-  └─> Avatares animados de cada host
-  └─> Transcripción en tiempo real sincronizada con audio
-  └─> "Clica para leer más" → enlace a la fuente original
-```
-
-**Pros:** Mucho más engaging que un monólogo, diferenciador vs competencia (NotebookLM vibes pero curado).
-**Contras:** Doble coste de TTS, guiones más complejos, post-producción de audio.
-
----
-
-## Recomendación
-
-**Empezar con Idea 1** (monolito MVP) pero con la arquitectura pensada para evolucionar a Idea 4 (multi-voz):
-
-1. **Fase 1 (MVP):** Una voz, 5 noticias, web app. Validar que el contenido mola.
-2. **Fase 2:** Añadir segunda voz (diálogo), jingles, transiciones.
-3. **Fase 3:** App móvil si el formato funciona.
-
-### Módulos reutilizables de ig-pipeline
-
-El sistema de research de `instagram-ai-bot` ya tiene:
-- **RSS feeds** (Google News, fuentes tech)
-- **Reddit scraper** (PRAW)
-- **NewsAPI** integración
-- **Google Trends** detección
-- **Deduplicación** por hash de fuentes
-
-Se puede extraer como librería compartida o copiar los módulos relevantes.
-
----
-
-## Arquitectura propuesta (MVP)
+## Arquitectura
 
 ```
 daily-audio-digest/
 ├── backend/
-│   ├── research/          # Buscar noticias (fork de ig-pipeline)
-│   ├── scriptwriter/      # Generar guiones hablados (GPT-4o)
-│   ├── tts/               # Text-to-Speech (ElevenLabs/Google)
-│   ├── packs/             # Orquestar: research → script → audio → pack
-│   ├── api/               # Flask/FastAPI endpoints
-│   └── storage/           # DB + file storage
+│   ├── config/             # Settings, API keys
+│   ├── research/           # Buscar noticias (fork de ig-pipeline)
+│   │   ├── sources.py      # RSS, NewsAPI, Reddit, Google Trends
+│   │   ├── ranker.py       # Seleccionar top 5 del día
+│   │   └── dedup.py        # No repetir noticias
+│   ├── scriptwriter/       # Generar guiones de diálogo
+│   │   └── writer.py       # Prompt → GPT-4o → guión Host A / Host B
+│   ├── tts/                # Text-to-Speech (caja negra)
+│   │   ├── base.py         # Interfaz abstracta
+│   │   ├── elevenlabs.py   # Implementación ElevenLabs
+│   │   └── gemini.py       # Implementación Gemini TTS
+│   ├── packs/              # Orquestador del pipeline
+│   │   └── generator.py    # research → script → audio → pack
+│   ├── storage/            # DB + audio file storage
+│   │   ├── models.py       # SQLAlchemy: packs, stories
+│   │   └── audio.py        # Guardar/servir mp3 (local o GCS)
+│   └── api/                # REST API
+│       └── app.py          # GET /api/packs, GET /api/packs/:id
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── PackList.tsx       # Lista de packs por fecha
-│   │   │   ├── PackPlayer.tsx     # Reproductor del pack
-│   │   │   ├── StoryCard.tsx      # Card de cada noticia
-│   │   │   └── ProgressBar.tsx    # Progreso pack completo
+│   │   │   ├── PackPlayer.tsx     # Reproductor del pack completo
+│   │   │   ├── StoryCard.tsx      # Card de cada noticia (activa/inactiva)
+│   │   │   └── WaveformBar.tsx    # Barra de progreso tipo podcast
 │   │   ├── hooks/
-│   │   │   └── useAudioPlayer.ts  # Lógica de reproducción
+│   │   │   └── usePackPlayer.ts   # Estado de reproducción del pack
+│   │   ├── api/
+│   │   │   └── client.ts
+│   │   ├── types/
+│   │   │   └── index.ts
 │   │   └── App.tsx
 │   └── package.json
 ├── scripts/
-│   └── generate_pack.py   # CLI para generar pack manualmente
+│   └── generate_pack.py    # CLI: python generate_pack.py --topic "IA"
 ├── requirements.txt
 ├── Dockerfile
 └── README.md
@@ -163,11 +123,87 @@ daily-audio-digest/
 
 ---
 
+## Pipeline de generación
+
+```
+1. Research        → Top 5 noticias del día sobre el tema
+2. Scriptwriter    → Para cada noticia: guión de diálogo 2 hosts (~300 palabras)
+3. TTS             → Guión → audio multi-voz (caja negra)
+4. Pack            → Metadata JSON + 5 archivos .mp3
+5. API             → Servir al frontend
+```
+
+---
+
+## Modelo de datos
+
+```sql
+-- Un pack = briefing del día
+packs:
+  id
+  topic           -- "IA", "tech", "crypto"
+  date            -- 2026-02-27
+  status          -- generating | ready | error
+  total_duration  -- segundos totales del pack
+  created_at
+
+-- Cada noticia dentro del pack
+stories:
+  id
+  pack_id         -- FK → packs
+  position        -- 1-5 (orden en el pack)
+  headline        -- Título de la noticia
+  summary         -- Resumen corto para mostrar en UI
+  source_urls     -- JSON array de fuentes
+  script          -- Guión completo del diálogo
+  audio_url       -- URL del .mp3 generado
+  duration        -- segundos
+  created_at
+```
+
+---
+
+## UI del reproductor
+
+```
+┌─────────────────────────────────────────────────┐
+│  📅 27 Feb 2026 · IA                            │
+│  Pack del día · 5 noticias · 10:32 min          │
+│                                                 │
+│  ▶ advancement in robotics                     │  ← activa (highlight)
+│    ━━━━━━━━━━━━━━━━━━░░░░░░░  1:24 / 2:05       │
+│                                                 │
+│  ○ nuevo modelo de openai                       │  ← siguiente
+│  ○ apple y la ia generativa                     │
+│  ○ regulación europea de ia                     │
+│  ○ startups de ia en latam                      │
+│                                                 │
+│  Pack: ━━━━━━░░░░░░░░░░░░░░░  3:12 / 10:32     │
+│                                                 │
+│  [⏮] [⏪ 15s] [  ▶  ] [15s ⏩] [⏭]             │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
 ## APIs necesarias
 
-| Servicio | Para qué | Coste aprox |
-|----------|----------|-------------|
-| OpenAI GPT-4o | Generar guiones hablados | ~$1/mes |
-| ElevenLabs | Text-to-Speech (voz natural) | $5-22/mes |
-| NewsAPI | Fuente de noticias | Gratis (100 req/día) |
-| Google Cloud TTS | Alternativa TTS más barata | ~$0.10/día |
+| Servicio | Para qué | Coste aprox/mes |
+|----------|----------|-----------------|
+| OpenAI GPT-4o | Guiones de diálogo | ~$1 |
+| Gemini 2.5 Flash TTS | Multi-voz (opción barata) | ~$6 |
+| ElevenLabs v3 | Multi-voz (opción premium) | $5-22 |
+| NewsAPI | Fuente de noticias | Gratis |
+| Cloud Run | Hosting | ~$5 |
+
+---
+
+## Research reutilizable de ig-pipeline
+
+El bot de Instagram (`instagram-ai-bot`) ya tiene módulos de research que se pueden reutilizar:
+
+- `modules/research.py` → RSS feeds, Google News, NewsAPI, Reddit (PRAW), Google Trends
+- `modules/post_store.py` → Deduplicación por hash de fuentes
+- `config/settings.py` → API keys compartidas
+
+Se copian los módulos relevantes al nuevo proyecto adaptándolos al formato de "noticias para audio" en vez de "noticias para carrusel de Instagram".
