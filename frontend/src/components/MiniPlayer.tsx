@@ -15,9 +15,12 @@ export default function MiniPlayer() {
     currentIndex,
     nextStory,
     prevStory,
+    cycleSpeed,
+    playbackSpeed,
   } = audio;
 
   const dragStartY = useRef(0);
+  const dragStartTime = useRef(0);
 
   if (!currentStory || playerView !== "mini") return null;
 
@@ -29,34 +32,56 @@ export default function MiniPlayer() {
 
   const onTouchStart = (e: React.TouchEvent) => {
     dragStartY.current = e.touches[0].clientY;
+    dragStartTime.current = Date.now();
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
     const deltaY = e.changedTouches[0].clientY - dragStartY.current;
-    if (deltaY < -30) {
-      setPlayerView("half");
+    const elapsed = Date.now() - dragStartTime.current;
+    const velocity = Math.abs(deltaY) / Math.max(elapsed, 1);
+    const threshold = velocity > 0.4 ? 15 : 30;
+    if (deltaY < -threshold) {
+      setPlayerView("full");
     }
   };
 
   return (
     <div
-      className="fixed bottom-14 left-1/2 -translate-x-1/2 w-full max-w-md z-40"
+      className="fixed left-1/2 -translate-x-1/2 z-40 touch-none"
+      style={{
+        bottom: `calc(var(--nav-height) + var(--mini-gap))`,
+        width: "calc(min(100vw, 28rem) - 1.5rem)",
+      }}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <div className="bg-white border-t border-border shadow-warm-md">
+      <div className="bg-white rounded-2xl shadow-warm-lg overflow-hidden">
+        {/* Swipe-up handle */}
+        <div className="flex justify-center pt-2 pb-0.5">
+          <div className="w-9 h-1 rounded-full bg-text-secondary/25" />
+        </div>
+
         {/* Progress bar */}
-        <div className="h-[2px] bg-muted">
+        <div className="h-[2px] mx-3 rounded-full bg-muted overflow-hidden">
           <div
-            className="h-full w-full bg-primary origin-left transition-transform duration-300"
+            className="h-full w-full bg-primary origin-left rounded-full will-change-transform"
             style={{ transform: `scaleX(${Math.min(progress, 100) / 100})` }}
           />
         </div>
 
-        <div className="flex items-center gap-2 px-3 py-2">
+        <div className="flex items-center gap-1.5 px-3 py-2">
+          {/* Speed control */}
+          <button
+            onClick={cycleSpeed}
+            className="shrink-0 text-[11px] font-bold text-text-secondary tabular-nums px-1.5 py-0.5 rounded-md bg-muted min-w-[36px] text-center"
+            aria-label={`Velocidad: ${playbackSpeed}x`}
+          >
+            {playbackSpeed}x
+          </button>
+
           {/* Info — tap to expand */}
-          <button onClick={() => setPlayerView("half")} className="flex-1 min-w-0 text-left">
-            <p className="text-sm font-medium truncate">{currentStory.headline}</p>
+          <button onClick={() => setPlayerView("full")} className="flex-1 min-w-0 text-left px-1.5">
+            <p className="text-sm font-semibold truncate leading-tight">{currentStory.headline}</p>
             <div className="flex items-center gap-1.5">
               <span
                 className="text-[10px] uppercase tracking-wider font-semibold"
@@ -87,16 +112,16 @@ export default function MiniPlayer() {
             </span>
           </button>
 
-          {/* Play/Pause */}
+          {/* Play/Pause — prominent */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               togglePlay();
             }}
-            className="p-1 shrink-0"
+            className="size-10 rounded-full bg-primary text-white flex items-center justify-center shrink-0 shadow-sm"
             aria-label={isPlaying ? "Pausar" : "Reproducir"}
           >
-            <span className="material-symbols-outlined text-[26px]" aria-hidden="true">
+            <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
               {isPlaying ? "pause" : "play_arrow"}
             </span>
           </button>
@@ -113,20 +138,6 @@ export default function MiniPlayer() {
           >
             <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
               skip_next
-            </span>
-          </button>
-
-          {/* Expand */}
-          <button
-            onClick={() => setPlayerView("half")}
-            className="p-1 shrink-0"
-            aria-label="Expandir reproductor"
-          >
-            <span
-              className="material-symbols-outlined text-[20px] text-text-secondary"
-              aria-hidden="true"
-            >
-              expand_less
             </span>
           </button>
         </div>

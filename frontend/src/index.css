@@ -1,12 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Material Symbols ──────────────────────────── */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga";
+}
+
+/* ── iOS native app ───────────────────────────── */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: #ffffff;
+}
+
+#app-scroll {
+  -webkit-overflow-scrolling: touch;
+}
 
 /* ── CSS custom properties ─────────────────────── */
 :root {
   --color-muted: #f4f0f0;
   --color-primary: #d32222;
   --color-surface: #ffffff;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-pill-height: 5rem;
+  --nav-pill-gap: 0.5rem;
+  --nav-height: calc(var(--nav-pill-height) + var(--nav-pill-gap) + var(--safe-bottom));
+  --mini-gap: 0.5rem;
+  --content-bottom-mini: calc(var(--nav-height) + 5rem + var(--mini-gap));
+  --content-bottom: calc(var(--nav-height) + 0.5rem);
+}
+
+/* ── Glass nav (liquid metal) ─────────────────── */
+.glass-nav {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.58));
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -0.5px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* ── Scroll lock (used by FullPlayer on #app-scroll) ── */
+
+/* ── Native iOS feel ──────────────────────────── */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+body {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ── Button components ─────────────────────────── */
@@ -146,6 +211,22 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 3px rgba(32, 18, 18, 0.15);
 }
 
+/* ── Modal entrance animation ──────────────────── */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-in 0.2s ease-out;
+}
+
 /* ── Badge pop animation ───────────────────────── */
 @keyframes badge-pop {
   0% {
@@ -169,7 +250,8 @@ input[type="range"]::-moz-range-thumb {
   .animate-eq-1,
   .animate-eq-2,
   .animate-eq-3,
-  .animate-badge-pop {
+  .animate-badge-pop,
+  .animate-modal-in {
     animation: none;
   }
 }

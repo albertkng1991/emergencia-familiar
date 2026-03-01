@@ -1,0 +1,1 @@
+"use strict";(()=>{var t="ngrok-free.dev";self.addEventListener("fetch",e=>{if(!new URL(e.request.url).hostname.endsWith(t))return;let r=new Headers(e.request.headers);r.set("ngrok-skip-browser-warning","true");let s=new Request(e.request,{headers:r});e.respondWith(fetch(s))});})();

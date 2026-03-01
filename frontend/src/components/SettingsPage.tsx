@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { fetchApiKeys, fetchTopics, saveApiKeys, testApiKeys } from "../api/client";
-import type { ApiKeysConfig, KeyTestResult, Topic } from "../types";
-
-type KeyStatus = "ok" | "error" | "testing" | "unconfigured";
+import { fetchTopics } from "../api/client";
+import { useAudio } from "../contexts/AudioContext";
+import type { Topic } from "../types";
 
 /* ── Interest chip ──────────────────────────────── */
 function InterestChip({
@@ -46,23 +45,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-/* ── Status dot for API keys ────────────────────── */
-function StatusDot({ status }: { status: KeyStatus }) {
-  const colors: Record<KeyStatus, string> = {
-    ok: "bg-green-500",
-    error: "bg-red-500",
-    testing: "bg-yellow-500 animate-pulse",
-    unconfigured: "bg-gray-300",
-  };
-  return (
-    <span
-      className={`inline-block size-2 rounded-full shrink-0 ${colors[status]}`}
-      title={status}
-    />
-  );
-}
-
 export default function SettingsPage() {
+  const { currentStory } = useAudio();
+  const hasMiniPlayer = currentStory !== null;
+
   // Topics / interests
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedTopics, setSelectedTopics] = useState<Set<string>>(new Set());
@@ -78,13 +64,6 @@ export default function SettingsPage() {
   // Duration
   const [duration, setDuration] = useState(15);
 
-  // API keys
-  const [apiConfig, setApiConfig] = useState<ApiKeysConfig | null>(null);
-  const [keyValues, setKeyValues] = useState<Record<string, string>>({});
-  const [keyStatuses, setKeyStatuses] = useState<Record<string, KeyStatus>>({});
-  const [saving, setSaving] = useState(false);
-  const [showApiKeys, setShowApiKeys] = useState(false);
-
   // Load topics
   useEffect(() => {
     async function loadTopics() {
@@ -97,80 +76,6 @@ export default function SettingsPage() {
     }
     loadTopics();
   }, []);
-
-  // Load API keys
-  const loadApiKeys = useCallback(async () => {
-    try {
-      const data = await fetchApiKeys();
-      setApiConfig(data);
-      const vals: Record<string, string> = {};
-      const sts: Record<string, KeyStatus> = {};
-      for (const group of data.groups) {
-        for (const key of group.keys) {
-          vals[key.env_var] = key.value ?? "";
-          sts[key.env_var] = key.has_value ? "ok" : "unconfigured";
-        }
-      }
-      setKeyValues(vals);
-      setKeyStatuses(sts);
-    } catch (e) {
-      console.error("Failed to load API keys:", e);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadApiKeys();
-  }, [loadApiKeys]);
-
-  const handleSaveKeys = async () => {
-    setSaving(true);
-    try {
-      await saveApiKeys(keyValues);
-      await loadApiKeys();
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleTestAll = async () => {
-    setKeyStatuses((prev) => {
-      const next = { ...prev };
-      for (const k in next) {
-        if (next[k] !== "unconfigured") next[k] = "testing";
-      }
-      return next;
-    });
-    try {
-      const results: Record<string, KeyTestResult> = await testApiKeys();
-      setKeyStatuses((prev) => {
-        const next = { ...prev };
-        for (const [k, r] of Object.entries(results)) {
-          if (!keyValues[k] && !r.ok) {
-            next[k] = "unconfigured";
-          } else {
-            next[k] = r.ok ? "ok" : "error";
-          }
-        }
-        return next;
-      });
-    } catch {
-      // keep current statuses
-    }
-  };
-
-  const handleTestOne = async (envVar: string) => {
-    setKeyStatuses((prev) => ({ ...prev, [envVar]: "testing" }));
-    try {
-      const results: Record<string, KeyTestResult> = await testApiKeys(envVar);
-      const r = results[envVar];
-      setKeyStatuses((prev) => ({
-        ...prev,
-        [envVar]: r?.ok ? "ok" : "error",
-      }));
-    } catch {
-      setKeyStatuses((prev) => ({ ...prev, [envVar]: "error" }));
-    }
-  };
 
   const toggleTopic = (name: string) => {
     setSelectedTopics((prev) => {
@@ -185,10 +90,17 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="pb-20">
+    <div
+      style={{
+        paddingBottom: hasMiniPlayer ? "var(--content-bottom-mini)" : "var(--content-bottom)",
+      }}
+    >
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center px-4 h-14">
+      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg border-b border-border">
+        <div
+          className="flex items-center px-4 h-14"
+          style={{ marginTop: "env(safe-area-inset-top, 0px)" }}
+        >
           <Link to="/" className="p-2 -ml-2 text-text-primary" aria-label="Volver">
             <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
               arrow_back
@@ -200,7 +112,7 @@ export default function SettingsPage() {
       </header>
 
       {/* Interests */}
-      <Section title="Temas de interés">
+      <Section title="Temas de interes">
         <div className="flex flex-wrap gap-2">
           {topics.length > 0
             ? topics.map((t) => (
@@ -211,7 +123,7 @@ export default function SettingsPage() {
                   onToggle={() => toggleTopic(t.name)}
                 />
               ))
-            : ["Tecnología", "Política", "Economía", "Deportes", "Ciencia", "Salud"].map((name) => (
+            : ["Tecnologia", "Politica", "Economia", "Deportes", "Ciencia", "Salud"].map((name) => (
                 <InterestChip
                   key={name}
                   label={name}
@@ -278,7 +190,7 @@ export default function SettingsPage() {
         <div className="space-y-2">
           {[
             { id: "natural-1", label: "Natural (Femenina)", desc: "Clara y profesional" },
-            { id: "natural-2", label: "Natural (Masculina)", desc: "Cálida y conversacional" },
+            { id: "natural-2", label: "Natural (Masculina)", desc: "Calida y conversacional" },
             { id: "news-1", label: "Noticiero", desc: "Formal, estilo reportaje" },
           ].map((v) => (
             <button
@@ -319,7 +231,7 @@ export default function SettingsPage() {
       </Section>
 
       {/* Duration */}
-      <Section title="Duración objetivo">
+      <Section title="Duracion objetivo">
         <div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-text-secondary">5 min</span>
@@ -336,13 +248,14 @@ export default function SettingsPage() {
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
             className="w-full"
-            aria-label="Duración objetivo en minutos"
+            aria-label="Duracion objetivo en minutos"
           />
         </div>
       </Section>
 
       {/* Account */}
-      <Section title="Cuenta y suscripción">
+      <section className="px-5 py-5">
+        <h2 className="font-display font-bold text-base mb-4 text-balance">Cuenta y suscripcion</h2>
         <div className="space-y-3">
           <div className="flex items-center justify-between py-1">
             <span className="text-sm text-text-secondary">Email</span>
@@ -355,94 +268,12 @@ export default function SettingsPage() {
             </span>
           </div>
           <button className="w-full text-center py-2.5 border border-border rounded-lg text-sm font-medium text-text-primary hover:bg-hover transition-colors">
-            Gestionar suscripción
+            Gestionar suscripcion
           </button>
           <button className="w-full text-center py-2.5 text-sm text-text-secondary hover:text-primary transition-colors">
-            Cerrar sesión
+            Cerrar sesion
           </button>
         </div>
-      </Section>
-
-      {/* API Keys (collapsible) */}
-      <section className="px-5 py-5">
-        <button
-          onClick={() => setShowApiKeys(!showApiKeys)}
-          className="flex items-center justify-between w-full"
-        >
-          <h2 className="font-display font-bold text-base text-balance">API Keys</h2>
-          <span
-            className="material-symbols-outlined text-[20px] text-text-secondary"
-            aria-hidden="true"
-          >
-            {showApiKeys ? "expand_less" : "expand_more"}
-          </span>
-        </button>
-
-        {showApiKeys && apiConfig && (
-          <div className="mt-4 space-y-6">
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleTestAll}
-                className="flex-1 py-2 rounded-lg border border-border text-sm font-medium text-text-secondary hover:bg-hover transition-colors"
-              >
-                Test All
-              </button>
-              <button
-                onClick={handleSaveKeys}
-                disabled={saving}
-                className="flex-1 py-2 rounded-lg bg-primary text-white text-sm font-medium disabled:opacity-50"
-              >
-                {saving ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
-
-            {apiConfig.groups.map((group) => (
-              <div key={group.id}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-3">
-                  {group.label}
-                </h3>
-                <div className="space-y-3">
-                  {group.keys.map((key) => (
-                    <div key={key.env_var} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <StatusDot status={keyStatuses[key.env_var] ?? "unconfigured"} />
-                        <label className="text-sm font-medium">{key.label}</label>
-                        {key.url && (
-                          <a
-                            href={key.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-primary hover:underline ml-auto"
-                          >
-                            Obtener key
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          type={key.secret ? "password" : "text"}
-                          value={keyValues[key.env_var] ?? ""}
-                          placeholder={key.placeholder ?? ""}
-                          onChange={(e) =>
-                            setKeyValues((prev) => ({ ...prev, [key.env_var]: e.target.value }))
-                          }
-                          className="flex-1 rounded-lg border border-border bg-hover px-3 py-2 text-sm placeholder-text-secondary/50 focus:border-primary focus:outline-none"
-                        />
-                        <button
-                          onClick={() => handleTestOne(key.env_var)}
-                          className="shrink-0 px-3 py-2 rounded-lg border border-border text-xs font-medium text-text-secondary hover:bg-muted"
-                        >
-                          Test
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );

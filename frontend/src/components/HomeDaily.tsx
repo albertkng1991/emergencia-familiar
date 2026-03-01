@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { fetchDates, fetchPacks, fetchTopics, searchStories } from "../api/client";
 import { useAudio } from "../contexts/AudioContext";
 import type { DateInfo, Pack, SearchResult, Story, Topic } from "../types";
@@ -9,19 +10,10 @@ function todayStr(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-function formatLongDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString("es-ES", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+function yesterdayStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function relativeDate(dateStr: string): string {
@@ -36,6 +28,55 @@ function relativeDate(dateStr: string): string {
   return dt.toLocaleDateString("es-ES", { day: "numeric", month: "short" });
 }
 
+type DatePeriod = "today" | "yesterday" | "this_week" | "this_month";
+
+function isInPeriod(dateStr: string, period: DatePeriod): boolean {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setHours(0, 0, 0, 0);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  switch (period) {
+    case "today":
+      return dt.getTime() === now.getTime();
+    case "yesterday": {
+      const yday = new Date(now);
+      yday.setDate(yday.getDate() - 1);
+      return dt.getTime() === yday.getTime();
+    }
+    case "this_week": {
+      const day = now.getDay();
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - ((day + 6) % 7));
+      return dt >= monday && dt <= now;
+    }
+    case "this_month": {
+      return (
+        dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear() && dt <= now
+      );
+    }
+  }
+}
+
+function countStoriesInPeriod(dates: DateInfo[], period: DatePeriod): number {
+  return dates.filter((d) => isInPeriod(d.date, period)).reduce((sum, d) => sum + d.count, 0);
+}
+
+const PERIOD_LABELS: Record<DatePeriod, string> = {
+  today: "Hoy",
+  yesterday: "Ayer",
+  this_week: "Esta semana",
+  this_month: "Este mes",
+};
+
+const PERIOD_TITLES: Record<DatePeriod, string> = {
+  today: "Edición de Hoy",
+  yesterday: "Edición de Ayer",
+  this_week: "Esta Semana",
+  this_month: "Este Mes",
+};
+
 type StoryWithTopicPack = Story & { topic: string; pack: Pack };
 
 export default function HomeDaily() {
@@ -44,14 +85,13 @@ export default function HomeDaily() {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [dates, setDates] = useState<DateInfo[]>([]);
-  const [selectedDate, setSelectedDate] = useState(todayStr());
+  const [selectedPeriod, setSelectedPeriod] = useState<DatePeriod>("today");
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const searchAbort = useRef<AbortController | null>(null);
   const [dismissed, setDismissed] = useState<Set<number>>(new Set());
-
   // Load dates
   useEffect(() => {
     async function loadDates() {
@@ -59,7 +99,7 @@ export default function HomeDaily() {
         const d = await fetchDates("daily");
         setDates(d);
         if (d.length > 0 && !d.some((x) => x.date === todayStr())) {
-          setSelectedDate(d[0].date);
+          setSelectedPeriod("yesterday");
         }
       } catch (e) {
         console.error("Failed to load dates:", e);
@@ -68,13 +108,18 @@ export default function HomeDaily() {
     loadDates();
   }, []);
 
-  // Load packs
+  // Load packs — single day for today/yesterday, all packs for week/month
   const loadPacks = useCallback(async () => {
-    if (!selectedDate) return;
     setLoading(true);
     try {
+      const isSingleDay = selectedPeriod === "today" || selectedPeriod === "yesterday";
+      const date = isSingleDay
+        ? selectedPeriod === "today"
+          ? todayStr()
+          : yesterdayStr()
+        : undefined;
       const [packsData, topicsData] = await Promise.all([
-        fetchPacks({ type: "daily", topic: activeTopic ?? undefined, date: selectedDate }),
+        fetchPacks({ type: "daily", topic: activeTopic ?? undefined, date }),
         fetchTopics("daily"),
       ]);
       setPacks(packsData);
@@ -84,7 +129,7 @@ export default function HomeDaily() {
     } finally {
       setLoading(false);
     }
-  }, [activeTopic, selectedDate]);
+  }, [activeTopic, selectedPeriod]);
 
   useEffect(() => {
     loadPacks();
@@ -99,14 +144,15 @@ export default function HomeDaily() {
     [packs],
   );
 
-  // Visible stories: not listened + not dismissed + search filter
+  // Visible stories: period filter + not listened + not dismissed + search filter
   const visibleStories = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     return allStories
+      .filter((s) => isInPeriod(s.pack.date, selectedPeriod))
       .filter((s) => !audio.isListened(s.id))
       .filter((s) => !dismissed.has(s.id))
       .filter((s) => !query || s.headline.toLowerCase().includes(query));
-  }, [allStories, audio, searchQuery, dismissed]);
+  }, [allStories, audio, searchQuery, dismissed, selectedPeriod]);
 
   // Global search with debounce
   const isSearchActive = searchQuery.trim().length >= 2;
@@ -149,76 +195,157 @@ export default function HomeDaily() {
     setDismissed((prev) => new Set(prev).add(storyId));
   }, []);
 
-  return (
-    <div className={hasMiniPlayer ? "pb-32" : "pb-20"}>
-      {/* Masthead */}
-      <header className="px-5 pt-8 pb-5 border-b border-border">
-        <div className="flex items-baseline gap-2">
-          <h1 className="font-display text-3xl font-bold tracking-tight lowercase">
-            onda<span className="text-primary">.</span>
-          </h1>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-text-secondary/50">
-            audio
-          </span>
-        </div>
-        <p className="font-display italic text-text-secondary text-sm mt-0.5">
-          {capitalize(formatLongDate(selectedDate))}
-        </p>
-      </header>
-      <div className="h-0.5 brand-accent" />
+  // ── Pull-to-refresh ──
+  const pullStartY = useRef(0);
+  const isPullingRef = useRef(false);
+  const pullDistRef = useRef(0);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-      {/* Search bar */}
-      <div className="px-5 pt-4 pb-2">
-        <div className="relative">
-          <span
-            className="material-symbols-outlined text-[20px] text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"
-            aria-hidden="true"
-          >
-            search
-          </span>
-          <input
-            type="text"
-            placeholder="Buscar noticias..."
-            aria-label="Buscar noticias"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm placeholder:text-text-secondary/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              aria-label="Limpiar búsqueda"
+  useEffect(() => {
+    const scrollEl = document.getElementById("app-scroll");
+    if (!scrollEl) return;
+
+    const onStart = (e: TouchEvent) => {
+      if (scrollEl.scrollTop <= 0 && !isRefreshing) {
+        pullStartY.current = e.touches[0].clientY;
+        isPullingRef.current = true;
+      }
+    };
+
+    const onMove = (e: TouchEvent) => {
+      if (!isPullingRef.current) return;
+      const delta = e.touches[0].clientY - pullStartY.current;
+      if (delta > 0 && scrollEl.scrollTop <= 0) {
+        e.preventDefault();
+        const damped = Math.min(delta * 0.45, 80);
+        pullDistRef.current = damped;
+        setPullDistance(damped);
+      } else {
+        isPullingRef.current = false;
+        pullDistRef.current = 0;
+        setPullDistance(0);
+      }
+    };
+
+    const onEnd = () => {
+      if (!isPullingRef.current) return;
+      isPullingRef.current = false;
+      const dist = pullDistRef.current;
+      pullDistRef.current = 0;
+      if (dist > 50) {
+        setIsRefreshing(true);
+        setPullDistance(44);
+        loadPacks().finally(() => {
+          setIsRefreshing(false);
+          setPullDistance(0);
+        });
+      } else {
+        setPullDistance(0);
+      }
+    };
+
+    scrollEl.addEventListener("touchstart", onStart, { passive: true });
+    scrollEl.addEventListener("touchmove", onMove, { passive: false });
+    scrollEl.addEventListener("touchend", onEnd, { passive: true });
+
+    return () => {
+      scrollEl.removeEventListener("touchstart", onStart);
+      scrollEl.removeEventListener("touchmove", onMove);
+      scrollEl.removeEventListener("touchend", onEnd);
+    };
+  }, [loadPacks, isRefreshing]);
+
+  return (
+    <div
+      style={{
+        paddingBottom: hasMiniPlayer ? "var(--content-bottom-mini)" : "var(--content-bottom)",
+      }}
+    >
+      {/* Sticky search header — extends behind status bar */}
+      <header
+        className="sticky top-0 z-10 bg-white/90 backdrop-blur-lg px-4 pb-2"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 0.75rem)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <span
+              className="material-symbols-outlined text-[20px] text-text-secondary absolute left-3 top-1/2 -translate-y-1/2"
+              aria-hidden="true"
             >
-              <span className="material-symbols-outlined text-[18px] text-text-secondary">
-                close
-              </span>
-            </button>
-          )}
+              search
+            </span>
+            <input
+              type="text"
+              placeholder="Buscar noticias..."
+              aria-label="Buscar noticias"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-muted text-sm placeholder:text-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                aria-label="Limpiar búsqueda"
+              >
+                <span className="material-symbols-outlined text-[18px] text-text-secondary">
+                  close
+                </span>
+              </button>
+            )}
+          </div>
+          <Link
+            to="/settings"
+            className="size-10 rounded-full bg-muted flex items-center justify-center shrink-0"
+            aria-label="Ajustes"
+          >
+            <span
+              className="material-symbols-outlined text-[20px] text-text-secondary"
+              aria-hidden="true"
+            >
+              person
+            </span>
+          </Link>
         </div>
+      </header>
+
+      {/* Pull-to-refresh indicator — below sticky header so it's visible */}
+      <div
+        className="flex justify-center items-center overflow-hidden"
+        style={{
+          height: isRefreshing ? 44 : pullDistance,
+          transition: isPullingRef.current ? "none" : "height 250ms ease-out",
+        }}
+      >
+        <span
+          className={`material-symbols-outlined text-[22px] text-primary ${
+            isRefreshing ? "animate-spin" : ""
+          }`}
+          style={
+            isRefreshing
+              ? undefined
+              : {
+                  transform: `rotate(${pullDistance * 4}deg)`,
+                  opacity: Math.min(pullDistance / 40, 1),
+                }
+          }
+        >
+          refresh
+        </span>
       </div>
 
-      {/* Date pills — hidden during search */}
-      {!isSearchActive && dates.length > 1 && (
+      {/* Period pills — hidden during search */}
+      {!isSearchActive && (
         <div className="flex gap-2 overflow-x-auto px-5 py-3 scrollbar-hide">
-          {dates.map((d) => {
-            const isSelected = d.date === selectedDate;
-            const label = (() => {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-              const [y, m, dy] = d.date.split("-").map(Number);
-              const dt = new Date(y, m - 1, dy);
-              const yesterday = new Date(today);
-              yesterday.setDate(today.getDate() - 1);
-              if (dt.getTime() === today.getTime()) return "Hoy";
-              if (dt.getTime() === yesterday.getTime()) return "Ayer";
-              return dt.toLocaleDateString("es-ES", { weekday: "short", day: "numeric" });
-            })();
+          {(["today", "yesterday", "this_week", "this_month"] as DatePeriod[]).map((period) => {
+            const isSelected = period === selectedPeriod;
+            const count = countStoriesInPeriod(dates, period);
             return (
               <button
-                key={d.date}
+                key={period}
                 onClick={() => {
-                  setSelectedDate(d.date);
+                  setSelectedPeriod(period);
                   setActiveTopic(null);
                 }}
                 className={`shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-colors ${
@@ -227,7 +354,8 @@ export default function HomeDaily() {
                     : "bg-muted text-text-secondary hover:bg-muted-hover"
                 }`}
               >
-                {label}
+                {PERIOD_LABELS[period]}
+                {count > 0 && <span className="ml-1 tabular-nums opacity-60">{count}</span>}
               </button>
             );
           })}
@@ -267,7 +395,7 @@ export default function HomeDaily() {
       {/* Section header */}
       <div className="px-5 pt-1 pb-3 flex items-center justify-between">
         <h2 className="font-display text-lg font-bold text-balance">
-          {isSearchActive ? "Resultados" : "Edición de Hoy"}
+          {isSearchActive ? "Resultados" : PERIOD_TITLES[selectedPeriod]}
         </h2>
         <span className="text-xs text-text-secondary tabular-nums">
           {isSearchActive
@@ -373,8 +501,8 @@ export default function HomeDaily() {
             </span>
             <p className="text-text-secondary text-sm text-balance">
               {activeTopic
-                ? `No hay historias de "${activeTopic}" hoy`
-                : "No hay historias para hoy"}
+                ? `No hay historias de "${activeTopic}" para este período`
+                : "No hay historias para este período"}
             </p>
             <p className="text-text-secondary/60 text-xs text-pretty mt-1">
               Las historias se generan automáticamente

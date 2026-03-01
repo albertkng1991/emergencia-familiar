@@ -41,9 +41,16 @@ export default function Escuchados() {
   const hasMiniPlayer = audio.currentStory !== null;
 
   return (
-    <div className={hasMiniPlayer ? "pb-32" : "pb-20"}>
+    <div
+      style={{
+        paddingBottom: hasMiniPlayer ? "var(--content-bottom-mini)" : "var(--content-bottom)",
+      }}
+    >
       {/* Header */}
-      <header className="px-5 pt-8 pb-6 border-b border-border">
+      <header
+        className="px-5 pb-6 border-b border-border"
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2rem)" }}
+      >
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-[28px] text-primary" aria-hidden="true">
             history

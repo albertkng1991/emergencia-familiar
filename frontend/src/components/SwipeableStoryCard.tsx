@@ -4,7 +4,10 @@ import { useQueue } from "../contexts/QueueContext";
 import { useSwipeGesture } from "../hooks/useSwipeGesture";
 import { categoryColor } from "../lib/categories";
 import { formatDuration } from "../lib/format";
+import { hapticImpact } from "../lib/haptics";
 import type { StoryWithTopic } from "../types";
+import DurationMenu from "./DurationMenu";
+import PremiumModal from "./PremiumModal";
 
 function StoryThumbnail({
   topic,
@@ -64,12 +67,60 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
   const audio = useAudio();
   const cardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [slideOut, setSlideOut] = useState<"left" | "right" | null>(null);
+  const [slideOut, setSlideOut] = useState<"left" | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [showDurationMenu, setShowDurationMenu] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const inBag = queue.isInBag(story.id);
+  const bagPosition = inBag ? queue.bag.findIndex((s) => s.id === story.id) + 1 : 0;
   const isCurrentlyPlaying = audio.currentStory?.id === story.id;
 
+  // ── Long-press detection ──
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFired = useRef(false);
+  const touchStart = useRef({ x: 0, y: 0 });
+
+  const clearLongPress = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }, []);
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (showDurationMenu) return;
+      longPressFired.current = false;
+      touchStart.current = { x: e.clientX, y: e.clientY };
+      longPressTimer.current = setTimeout(() => {
+        longPressFired.current = true;
+        hapticImpact();
+        setShowDurationMenu(true);
+      }, 500);
+    },
+    [showDurationMenu],
+  );
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const dx = Math.abs(e.clientX - touchStart.current.x);
+      const dy = Math.abs(e.clientY - touchStart.current.y);
+      if (dx > 10 || dy > 10) {
+        clearLongPress();
+      }
+    },
+    [clearLongPress],
+  );
+
+  const onPointerUp = useCallback(() => {
+    clearLongPress();
+  }, [clearLongPress]);
+
   const handleAddToQueue = useCallback(() => {
+    if (queue.bag.length >= 4) {
+      setShowPremiumModal(true);
+      return;
+    }
     queue.addToBag(story);
     audio.enqueue([story]);
     const el = containerRef.current;
@@ -79,31 +130,45 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
     }
   }, [queue, audio, story]);
 
-  const handleSwipeRight = useCallback(() => {
-    setSlideOut("right");
-  }, []);
+  const handleRemoveFromQueue = useCallback(() => {
+    queue.removeFromBag(story.id);
+  }, [queue, story.id]);
 
+  // Right swipe: toggle queue (add if not in bag, remove if already in bag)
+  const handleSwipeRight = useCallback(() => {
+    hapticImpact();
+    if (inBag) {
+      handleRemoveFromQueue();
+    } else {
+      handleAddToQueue();
+    }
+  }, [inBag, handleAddToQueue, handleRemoveFromQueue]);
+
+  // Left swipe: dismiss — slide out and collapse
   const handleSwipeLeft = useCallback(() => {
+    hapticImpact();
     setSlideOut("left");
   }, []);
 
   const swipeState = useSwipeGesture(cardRef, {
     onSwipeRight: handleSwipeRight,
     onSwipeLeft: handleSwipeLeft,
-    enabled: !inBag,
+    enabled: !showDurationMenu,
   });
 
   const handleSlideOutEnd = () => {
     if (!slideOut) return;
     setCollapsed(true);
-    if (slideOut === "right") {
-      handleAddToQueue();
-    } else {
-      onDismiss(story.id);
-    }
+    if (inBag) handleRemoveFromQueue();
+    onDismiss(story.id);
   };
 
   const handleTap = () => {
+    // If long-press just fired, don't treat as tap
+    if (longPressFired.current) {
+      longPressFired.current = false;
+      return;
+    }
     if (isCurrentlyPlaying) {
       audio.togglePlay();
       return;
@@ -118,31 +183,28 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden transition-[max-height,opacity] duration-300"
+      className={`relative transition-[max-height,opacity] duration-300 ${showDurationMenu ? "" : "overflow-hidden"}`}
       style={{
         maxHeight: collapsed ? 0 : 500,
         opacity: collapsed ? 0 : 1,
       }}
-      onTransitionEnd={(e) => {
-        if (collapsed && e.propertyName === "max-height") {
-          // Cleanup after height collapse animation
-        }
-      }}
     >
-      {/* Right swipe reveal — green add */}
+      {/* Right swipe reveal — green add / orange remove */}
       <div
         className="absolute inset-0 flex items-center pl-6 rounded-lg"
         style={{
-          backgroundColor: `rgb(22 163 74 / ${revealOpacity * 0.15})`,
+          backgroundColor: inBag
+            ? `rgb(234 88 12 / ${revealOpacity * 0.15})`
+            : `rgb(22 163 74 / ${revealOpacity * 0.15})`,
           opacity: swipeState.direction === "right" ? 1 : 0,
         }}
       >
         <span
           className="material-symbols-outlined text-[28px]"
-          style={{ color: "#16a34a", opacity: revealOpacity }}
+          style={{ color: inBag ? "#ea580c" : "#16a34a", opacity: revealOpacity }}
           aria-hidden="true"
         >
-          queue_music
+          {inBag ? "playlist_remove" : "queue_music"}
         </span>
       </div>
 
@@ -168,9 +230,7 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
         ref={cardRef}
         className="relative bg-white"
         style={{
-          transform: slideOut
-            ? `translateX(${slideOut === "right" ? "110%" : "-110%"})`
-            : `translateX(${swipeState.offsetX}px)`,
+          transform: slideOut ? "translateX(-110%)" : `translateX(${swipeState.offsetX}px)`,
           transition: swipeState.isSwiping
             ? "none"
             : "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)",
@@ -184,6 +244,11 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
       >
         <button
           onClick={handleTap}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onContextMenu={(e) => e.preventDefault()}
           aria-label={`${isCurrentlyPlaying ? (audio.isPlaying ? "Pausar" : "Reanudar") : "Reproducir"}: ${story.headline}`}
           className={`flex gap-4 py-4 w-full text-left ${!isLast ? "border-b border-border" : ""}`}
         >
@@ -203,12 +268,15 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
                 </span>
               )}
               {!isCurrentlyPlaying && inBag && (
-                <span
-                  className="material-symbols-outlined text-[14px] text-green-600"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                  aria-hidden="true"
-                >
-                  check_circle
+                <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 rounded-full px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+                  <span
+                    className="material-symbols-outlined text-[12px]"
+                    style={{ fontVariationSettings: "'FILL' 1" }}
+                    aria-hidden="true"
+                  >
+                    check
+                  </span>
+                  Cola · #{bagPosition}
                 </span>
               )}
             </div>
@@ -248,6 +316,24 @@ export default function SwipeableStoryCard({ story, progress, isLast, onDismiss 
           </div>
         </button>
       </div>
+
+      {/* Duration menu (long-press) */}
+      {showDurationMenu && (
+        <DurationMenu
+          onSelect2min={() => {
+            setShowDurationMenu(false);
+            audio.play([story], 0);
+            audio.setPlayerView("mini");
+          }}
+          onSelectPremium={() => {
+            setShowDurationMenu(false);
+            setShowPremiumModal(true);
+          }}
+          onClose={() => setShowDurationMenu(false)}
+        />
+      )}
+
+      <PremiumModal open={showPremiumModal} onClose={() => setShowPremiumModal(false)} />
     </div>
   );
 }

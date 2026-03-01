@@ -12,3 +12,4 @@ pytrends>=4.9
 
 # Audio
 pydub>=0.25
+elevenlabs>=1.0

@@ -8,6 +8,15 @@ import type {
   TrendingTopic,
 } from "../types";
 
+export const API_BASE = import.meta.env.VITE_API_URL || "";
+const API = API_BASE;
+
+function apiFetch(url: string, init?: RequestInit): Promise<Response> {
+  const headers = new Headers(init?.headers);
+  if (API_BASE) headers.set("ngrok-skip-browser-warning", "true");
+  return fetch(url, { ...init, headers });
+}
+
 type PackType = "daily" | "weekly";
 
 export async function fetchPacks(opts?: {
@@ -20,49 +29,49 @@ export async function fetchPacks(opts?: {
   if (opts?.topic) params.set("topic", opts.topic);
   if (opts?.date) params.set("date", opts.date);
   const qs = params.toString();
-  const url = qs ? `/api/packs?${qs}` : "/api/packs";
-  const res = await fetch(url);
+  const url = qs ? `${API}/api/packs?${qs}` : `${API}/api/packs`;
+  const res = await apiFetch(url);
   if (!res.ok) throw new Error("Failed to fetch packs");
   const data = await res.json();
   return data.packs;
 }
 
 export async function fetchDates(type: PackType = "daily"): Promise<DateInfo[]> {
-  const res = await fetch(`/api/packs/dates?type=${type}`);
+  const res = await apiFetch(`${API}/api/packs/dates?type=${type}`);
   if (!res.ok) throw new Error("Failed to fetch dates");
   const data = await res.json();
   return data.dates;
 }
 
 export async function fetchTrending(): Promise<TrendingTopic[]> {
-  const res = await fetch("/api/packs/trending");
+  const res = await apiFetch(`${API}/api/packs/trending`);
   if (!res.ok) throw new Error("Failed to fetch trending");
   const data = await res.json();
   return data.trending;
 }
 
 export async function fetchTopics(type: PackType = "daily"): Promise<Topic[]> {
-  const res = await fetch(`/api/topics?type=${type}`);
+  const res = await apiFetch(`${API}/api/topics?type=${type}`);
   if (!res.ok) throw new Error("Failed to fetch topics");
   const data = await res.json();
   return data.topics;
 }
 
 export async function searchStories(query: string): Promise<SearchResult[]> {
-  const res = await fetch(`/api/stories/search?q=${encodeURIComponent(query)}`);
+  const res = await apiFetch(`${API}/api/stories/search?q=${encodeURIComponent(query)}`);
   if (!res.ok) throw new Error("Failed to search stories");
   const data = await res.json();
   return data.stories;
 }
 
 export async function fetchPack(id: number): Promise<Pack> {
-  const res = await fetch(`/api/packs/${id}`);
+  const res = await apiFetch(`${API}/api/packs/${id}`);
   if (!res.ok) throw new Error("Failed to fetch pack");
   return res.json();
 }
 
 export async function generatePack(topic: string = "IA", count: number = 5): Promise<Pack> {
-  const res = await fetch("/api/packs/generate", {
+  const res = await apiFetch(`${API}/api/packs/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ topic, count }),
@@ -75,13 +84,13 @@ export async function generatePack(topic: string = "IA", count: number = 5): Pro
 }
 
 export async function fetchApiKeys(): Promise<ApiKeysConfig> {
-  const res = await fetch("/api/keys");
+  const res = await apiFetch(`${API}/api/keys`);
   if (!res.ok) throw new Error("Failed to fetch API keys");
   return res.json();
 }
 
 export async function saveApiKeys(keys: Record<string, string>): Promise<void> {
-  const res = await fetch("/api/keys", {
+  const res = await apiFetch(`${API}/api/keys`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ keys }),
@@ -90,7 +99,7 @@ export async function saveApiKeys(keys: Record<string, string>): Promise<void> {
 }
 
 export async function testApiKeys(key?: string): Promise<Record<string, KeyTestResult>> {
-  const res = await fetch("/api/keys/test", {
+  const res = await apiFetch(`${API}/api/keys/test`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(key ? { key } : {}),

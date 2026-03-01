@@ -74,6 +74,10 @@ TRENDS_KEYWORDS = [
 TTS_VOICE_A = os.getenv("TTS_VOICE_A", "Charon")
 TTS_VOICE_B = os.getenv("TTS_VOICE_B", "Kore")
 
+# ElevenLabs (single-speaker narration)
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
+ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "onwK4e9ZLuTAKqWW03F9")  # Daniel - Steady Broadcaster
+
 # --- Scriptwriter ---
 SCRIPTWRITER_MODEL = os.getenv("SCRIPTWRITER_MODEL", "gpt-4o")
 

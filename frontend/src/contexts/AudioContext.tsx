@@ -8,13 +8,14 @@ import {
   type ReactNode,
 } from "react";
 import type { Story } from "../types";
+import { API_BASE } from "../api/client";
 
 export interface ListenedStory extends Story {
   topic: string;
   listenedAt: string;
 }
 
-type PlayerView = "mini" | "half" | "full";
+type PlayerView = "mini" | "full";
 
 interface AudioState {
   queue: (Story & { topic: string })[];
@@ -126,7 +127,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       if (nextIndex < s.queue.length) {
         const nextStory = s.queue[nextIndex];
         if (nextStory.audio_url) {
-          audio.src = nextStory.audio_url;
+          audio.src = `${API_BASE}${nextStory.audio_url}`;
           audio.playbackRate = s.playbackSpeed;
           audio.play();
         }
@@ -166,7 +167,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     const story = stories[startIndex];
     if (!story?.audio_url) return;
 
-    audio.src = story.audio_url;
+    audio.src = `${API_BASE}${story.audio_url}`;
     audio.playbackRate = stateRef.current.playbackSpeed;
     audio.play();
 
@@ -191,7 +192,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (!s.isPlaying) {
       const first = newStories[0];
       if (audio && first?.audio_url) {
-        audio.src = first.audio_url;
+        audio.src = `${API_BASE}${first.audio_url}`;
         audio.playbackRate = s.playbackSpeed;
         audio.play();
         setState((prev) => ({
@@ -225,7 +226,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       const story = s.queue[s.currentIndex];
       if (story?.audio_url) {
         if (!audio.src || audio.ended) {
-          audio.src = story.audio_url;
+          audio.src = `${API_BASE}${story.audio_url}`;
           audio.playbackRate = s.playbackSpeed;
         }
         audio.play();
@@ -247,7 +248,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       const story = s.queue[next];
       const audio = audioRef.current;
       if (audio && story?.audio_url) {
-        audio.src = story.audio_url;
+        audio.src = `${API_BASE}${story.audio_url}`;
         audio.playbackRate = s.playbackSpeed;
         audio.play();
         setState((prev) => ({ ...prev, currentIndex: next, currentTime: 0 }));
@@ -262,7 +263,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       const story = s.queue[prev];
       const audio = audioRef.current;
       if (audio && story?.audio_url) {
-        audio.src = story.audio_url;
+        audio.src = `${API_BASE}${story.audio_url}`;
         audio.playbackRate = s.playbackSpeed;
         audio.play();
         setState((p) => ({ ...p, currentIndex: prev, currentTime: 0 }));
