@@ -142,6 +142,33 @@ def create_app() -> Flask:
             logger.error(f"Generation failed: {e}")
             return jsonify({"error": str(e)}), 500
 
+    @app.post("/api/resumenes/generate")
+    def generate_resumenes():
+        from backend.packs.resumen_generator import generate_weekly_resumenes
+
+        data = request.get_json(silent=True) or {}
+        count = data.get("count", 10)
+
+        try:
+            results = generate_weekly_resumenes(count=count)
+            return jsonify({"packs": results}), 201
+        except Exception as e:
+            logger.error(f"Resumen generation failed: {e}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.get("/api/resumenes")
+    def list_resumenes():
+        session = get_session()
+        try:
+            q = session.query(Pack).filter(Pack.status == "ready", Pack.pack_type == "weekly")
+            topic = request.args.get("topic")
+            if topic:
+                q = q.filter(func.lower(Pack.topic) == topic.lower())
+            packs = q.order_by(Pack.created_at.desc()).all()
+            return jsonify({"packs": [p.to_dict(preview=True) for p in packs]})
+        finally:
+            session.close()
+
     @app.get("/api/stories/search")
     def search_stories():
         q = request.args.get("q", "").strip()
