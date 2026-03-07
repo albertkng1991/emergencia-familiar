@@ -71,17 +71,7 @@ Para CADA vehículo:
 
 ---
 
-## BLOQUE 5: Finanzas
-
-| Campo | Descripción |
-|-------|-------------|
-| Fondo de emergencia | ¿Para cuánto tiempo tenéis ahorros? (1 semana, 1 mes, 3 meses, 6+ meses) |
-| Efectivo en casa | ¿Tenéis algo de efectivo guardado? ¿Cuánto aproximadamente? |
-| Seguros | ¿Qué seguros tenéis? (hogar, coche, vida, médico privado) |
-
----
-
-## BLOQUE 6: Suministros actuales
+## BLOQUE 5: Suministros actuales
 
 | Campo | Descripción |
 |-------|-------------|
@@ -94,7 +84,7 @@ Para CADA vehículo:
 
 ---
 
-## BLOQUE 7: Comunicaciones
+## BLOQUE 6: Comunicaciones
 
 | Campo | Descripción |
 |-------|-------------|
@@ -107,7 +97,7 @@ Para CADA vehículo:
 
 ---
 
-## BLOQUE 8: Entorno
+## BLOQUE 7: Entorno
 
 | Campo | Descripción |
 |-------|-------------|
@@ -120,7 +110,7 @@ Para CADA vehículo:
 
 ---
 
-## BLOQUE 9: Preferencias
+## BLOQUE 8: Preferencias
 
 | Campo | Descripción |
 |-------|-------------|

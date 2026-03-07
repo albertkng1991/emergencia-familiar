@@ -99,14 +99,6 @@
         }
       }
     },
-    "finanzas": {
-      "type": "object",
-      "properties": {
-        "fondoEmergencia": { "type": "string" },
-        "efectivoCasa": { "type": "string" },
-        "seguros": { "type": "array", "items": { "type": "string" } }
-      }
-    },
     "suministros": {
       "type": "object",
       "properties": {

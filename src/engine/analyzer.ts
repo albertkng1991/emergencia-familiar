@@ -197,11 +197,6 @@ function detectarFortalezas(n: NucleoBase): Fortaleza[] {
     f.push({ tipo: 'comunicaciones', descripcion: 'Dispone de radio de emergencia' });
   }
 
-  // Fondo de emergencia
-  if (n.finanzas?.fondoEmergencia && ['3 meses', '6+ meses', '6 meses'].includes(n.finanzas.fondoEmergencia)) {
-    f.push({ tipo: 'finanzas', descripcion: `Fondo de emergencia para ${n.finanzas.fondoEmergencia}` });
-  }
-
   // Cocina alternativa
   if (n.suministros?.cocinaAlternativa && n.suministros.cocinaAlternativa !== '') {
     f.push({ tipo: 'suministros', descripcion: `Cocina alternativa: ${n.suministros.cocinaAlternativa}` });

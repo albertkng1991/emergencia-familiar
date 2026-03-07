@@ -65,12 +65,10 @@ export function construirDossier(
       'DNI/Pasaporte de todos los miembros',
       'Libro de familia',
       'Tarjetas sanitarias',
-      'Pólizas de seguro',
       'Escritura de la vivienda / contrato de alquiler',
       'Documentación del vehículo',
       'Recetas médicas actualizadas',
       'Contactos de emergencia impresos',
-      'Extractos bancarios recientes',
       'Documentación de mascotas (cartilla veterinaria)',
     ],
   };

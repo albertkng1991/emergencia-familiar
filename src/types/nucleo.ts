@@ -54,12 +54,6 @@ export interface Recursos {
   propiedadSecundaria?: PropiedadSecundaria;
 }
 
-export interface Finanzas {
-  fondoEmergencia?: string;
-  efectivoCasa?: string;
-  seguros?: string[];
-}
-
 export interface Suministros {
   comidaNoPerecedera?: string;
   aguaAlmacenada?: string;
@@ -150,7 +144,6 @@ export interface NucleoBase {
   vivienda: Vivienda;
   transporte: Transporte;
   recursos: Recursos;
-  finanzas: Finanzas;
   suministros: Suministros;
   comunicaciones: Comunicaciones;
   entorno: Entorno;

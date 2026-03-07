@@ -381,20 +381,13 @@ function generarProtocoloCrisisEconomica(
 
   // Fase inmediata
   faseInmediata.push({ orden: paso++, accion: 'Retira efectivo del banco (cantidad razonable). Los cajeros pueden dejar de funcionar.' });
-
-  if (nucleo.finanzas?.fondoEmergencia) {
-    faseInmediata.push({
-      orden: paso++,
-      accion: `Tu fondo de emergencia actual: ${nucleo.finanzas.fondoEmergencia}. No lo toques excepto para necesidades básicas.`,
-    });
-  }
-
+  faseInmediata.push({ orden: paso++, accion: 'Si tienes ahorros o fondo de emergencia, no lo toques excepto para necesidades básicas (vivienda, alimentación, medicación).' });
   faseInmediata.push({ orden: paso++, accion: 'Haz compra grande de productos no perecederos antes de posibles subidas de precio.' });
 
   // Fase corta
   paso = 1;
   faseCorta.push({ orden: paso++, accion: 'Revisa y reduce gastos no esenciales inmediatamente.' });
-  faseCorta.push({ orden: paso++, accion: 'Contacta con seguros para confirmar coberturas vigentes.' });
+  faseCorta.push({ orden: paso++, accion: 'Si tienes seguros (hogar, coche, vida), contacta para confirmar coberturas vigentes.' });
   faseCorta.push({ orden: paso++, accion: 'Coordina con otros núcleos para compras conjuntas y compartir recursos.' });
 
   if (nucleo.recursos?.huertoAnimales) {

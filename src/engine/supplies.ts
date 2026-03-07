@@ -149,14 +149,14 @@ function generarListaBase(n: NucleoBase, personas: number): ItemSuministro[] {
     tieneActualmente: !!(n.recursos?.herramientas && n.recursos.herramientas.length > 0),
   });
 
-  // Efectivo
+  // Efectivo (consejo genérico, no se pregunta la cantidad)
   items.push({
     categoria: 'Finanzas',
     item: 'Efectivo en billetes pequeños',
     cantidad72h: '100-200€',
     cantidad2semanas: '500-1000€',
-    tieneActualmente: !!(n.finanzas?.efectivoCasa && n.finanzas.efectivoCasa !== ''),
-    notas: n.finanzas?.efectivoCasa ? `Actualmente: ${n.finanzas.efectivoCasa}` : undefined,
+    tieneActualmente: false,
+    notas: 'Es recomendable tener efectivo en casa por si fallan cajeros o datáfonos',
   });
 
   return items;

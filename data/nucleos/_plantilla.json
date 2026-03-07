@@ -47,12 +47,6 @@
     "propiedadSecundaria": null
   },
 
-  "finanzas": {
-    "fondoEmergencia": "",
-    "efectivoCasa": "",
-    "seguros": []
-  },
-
   "suministros": {
     "comidaNoPerecedera": "",
     "aguaAlmacenada": "",
