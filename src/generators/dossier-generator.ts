@@ -9,6 +9,15 @@ import { asignarRoles } from '../engine/roles';
 import { generarProtocolos } from '../engine/scenarios';
 import { generarCadenaContacto } from '../engine/contacts';
 import { calcularSuministros } from '../engine/supplies';
+import { generarMochilasEmergencia } from '../engine/bugout-bag';
+import { generarProtocoloReunificacion } from '../engine/reunification';
+import { generarCalendarioRotacion } from '../engine/rotation';
+import { generarPlanEvacuacion } from '../engine/evacuation-routes';
+import { generarProtocoloComunicaciones } from '../engine/degraded-comms';
+import { generarPlanAgua } from '../engine/water-plan';
+import { generarRedVecinos } from '../engine/neighbors';
+import { generarPautasEmocionales } from '../engine/emotional';
+import { generarInfoDigital } from '../engine/digital-backup';
 import {
   crearDocumento,
   crearPortada,
@@ -71,6 +80,15 @@ export function construirDossier(
       'Contactos de emergencia impresos',
       'Documentación de mascotas (cartilla veterinaria)',
     ],
+    mochilas: generarMochilasEmergencia(nucleo),
+    reunificacion: generarProtocoloReunificacion(nucleo, inter),
+    planEvacuacion: generarPlanEvacuacion(nucleo, nucleos, inter),
+    comunicacionesDegradadas: generarProtocoloComunicaciones(nucleo, nucleos, inter),
+    calendarioRotacion: generarCalendarioRotacion(nucleo),
+    planAgua: generarPlanAgua(nucleo),
+    redVecinos: generarRedVecinos(nucleo),
+    pautasEmocionales: generarPautasEmocionales(nucleo),
+    infoDigital: generarInfoDigital(nucleo),
   };
 }
 
@@ -216,9 +234,25 @@ export async function generarDossierDocx(
     secciones.push(crearAlerta(`Te faltan ${dossier.suministros.resumenFaltantes.length} items. Revisa la lista y adquiérelos progresivamente.`, 'aviso'));
   }
 
+  // 6b. MOCHILAS DE EMERGENCIA
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('6. Mochilas de Emergencia', 1));
+  secciones.push(crearParrafo('Cada miembro tiene su mochila personalizada. Prepáralas y tenlas siempre listas junto a la puerta.'));
+
+  for (const mochila of dossier.mochilas) {
+    secciones.push(crearTitulo(`${mochila.persona} (${mochila.perfil})`, 2));
+    const mochilaFilas = mochila.items.map(item => [
+      item.esencial ? '⚠' : '○',
+      item.item,
+      item.cantidad,
+      item.notas || '',
+    ]);
+    secciones.push(crearTabla(['', 'Item', 'Cantidad', 'Notas'], mochilaFilas));
+  }
+
   // 7. PROTOCOLOS POR ESCENARIO
   secciones.push(crearSeparador());
-  secciones.push(crearTitulo('6. Protocolos por Escenario', 1));
+  secciones.push(crearTitulo('7. Protocolos por Escenario', 1));
 
   for (const protocolo of dossier.protocolos) {
     secciones.push(crearTitulo(protocolo.titulo, 2));
@@ -236,7 +270,7 @@ export async function generarDossierDocx(
 
   // 8. TU ROL EN EL PLAN
   secciones.push(crearSeparador());
-  secciones.push(crearTitulo('7. Tu Rol en el Plan', 1));
+  secciones.push(crearTitulo('8. Tu Rol en el Plan', 1));
 
   if (miRol) {
     secciones.push(crearAlerta(`Rol principal: ${miRol.rolPrincipal}`, 'info'));
@@ -264,13 +298,45 @@ export async function generarDossierDocx(
     }
   }
 
-  // 9. MAPA DE EVACUACIÓN
+  // 9. PLAN DE EVACUACIÓN DETALLADO
   secciones.push(crearSeparador());
-  secciones.push(crearTitulo('8. Plan de Evacuación', 1));
+  secciones.push(crearTitulo('9. Plan de Evacuación', 1));
 
-  const escEvac = dossier.protocolos.find(p => p.escenario === 'catastrofe');
-  if (escEvac) {
-    secciones.push(crearParrafo(`Destino de evacuación: ${dossier.puntosEncuentro.global.ubicacion}`, { bold: true }));
+  secciones.push(crearParrafo(`Destino de evacuación: ${dossier.puntosEncuentro.global.ubicacion}`, { bold: true }));
+
+  if (dossier.planEvacuacion.rutasDesdeHogar.length > 0) {
+    secciones.push(crearTitulo('Rutas desde tu hogar', 2));
+    for (const ruta of dossier.planEvacuacion.rutasDesdeHogar) {
+      secciones.push(crearTitulo(`${ruta.nombre} → ${ruta.destino}`, 3));
+      secciones.push(crearParrafo(ruta.descripcion));
+      secciones.push(crearParrafo(`Tiempo estimado: ${ruta.tiempoEstimado}`, { italic: true }));
+      if (ruta.notas) secciones.push(crearParrafo(ruta.notas, { italic: true }));
+    }
+  }
+
+  if (dossier.planEvacuacion.secuenciaRecogida) {
+    secciones.push(crearTitulo('Secuencia de recogida', 2));
+    const seqFilas = dossier.planEvacuacion.secuenciaRecogida.map(s => [
+      `${s.orden}`,
+      s.nucleo,
+      s.nombre,
+      s.direccion,
+      s.telefono,
+    ]);
+    secciones.push(crearTabla(['Orden', 'ID', 'Núcleo', 'Dirección', 'Teléfono'], seqFilas));
+  }
+
+  secciones.push(crearTitulo('Antes de irte', 2));
+  secciones.push(...crearListaNumerada(dossier.planEvacuacion.antesDeIrte));
+
+  secciones.push(crearTitulo('Qué llevar', 2));
+  secciones.push(...crearListaNumerada(dossier.planEvacuacion.queLlevar));
+
+  if (dossier.planEvacuacion.instruccionesEspeciales.length > 0) {
+    secciones.push(crearTitulo('Instrucciones especiales', 2));
+    for (const instr of dossier.planEvacuacion.instruccionesEspeciales) {
+      secciones.push(crearAlerta(instr, 'aviso'));
+    }
   }
 
   if (nucleo.transporte?.vehiculos?.length) {
@@ -289,9 +355,129 @@ export async function generarDossierDocx(
     secciones.push(crearParrafo(`Conductores: ${nucleo.transporte.conductores.join(', ')}`));
   }
 
-  // 10. DOCUMENTACIÓN
+  // 10. PROTOCOLO DE REUNIFICACIÓN
   secciones.push(crearSeparador());
-  secciones.push(crearTitulo('9. Documentación a Preparar', 1));
+  secciones.push(crearTitulo('10. Protocolo de Reunificación', 1));
+  secciones.push(crearParrafo('Si la emergencia os pilla separados (trabajo, colegio, etc.), seguid este protocolo:'));
+
+  secciones.push(crearTitulo('¿Dónde está cada miembro habitualmente?', 2));
+  const ubicFilas = dossier.reunificacion.ubicacionesMiembros.map(u => [
+    u.miembro,
+    u.lugarTrabajo || u.lugarEstudios || 'En casa',
+    u.horarioHabitual || '—',
+    u.instruccion,
+  ]);
+  secciones.push(crearTabla(['Miembro', 'Ubicación habitual', 'Horario', 'Instrucción'], ubicFilas));
+
+  if (dossier.reunificacion.instruccionesNinos.length > 0) {
+    secciones.push(crearTitulo('Recogida de menores', 2));
+    for (const instr of dossier.reunificacion.instruccionesNinos) {
+      secciones.push(crearAlerta(instr, 'aviso'));
+    }
+  }
+
+  secciones.push(crearTitulo('Instrucciones generales', 2));
+  secciones.push(...crearListaNumerada(dossier.reunificacion.instruccionesGenerales));
+
+  secciones.push(crearTitulo('Plan B: si no puedes llegar a casa', 2));
+  secciones.push(...crearListaNumerada(dossier.reunificacion.planBSiNoPuedesLlegarACasa));
+
+  // 11. COMUNICACIONES DEGRADADAS
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('11. Comunicaciones cuando falla todo', 1));
+  secciones.push(crearParrafo('Si un canal falla, baja al siguiente nivel. No te saltes niveles.'));
+
+  const commsFilas = dossier.comunicacionesDegradadas.niveles.map(n => [
+    `${n.nivel}`,
+    n.nombre,
+    n.canal,
+    n.disponible ? '✓ SÍ' : '✗ NO',
+  ]);
+  secciones.push(crearTabla(['Nivel', 'Canal', 'Detalle', '¿Lo tienes?'], commsFilas));
+
+  for (const nivel of dossier.comunicacionesDegradadas.niveles) {
+    if (nivel.instrucciones.length > 0) {
+      secciones.push(crearTitulo(`Nivel ${nivel.nivel}: ${nivel.nombre}`, 3));
+      secciones.push(...crearListaNumerada(nivel.instrucciones));
+    }
+  }
+
+  if (dossier.comunicacionesDegradadas.ventanasEscucha) {
+    secciones.push(crearTitulo('Ventanas de escucha (walkie-talkies)', 2));
+    const ventFilas = dossier.comunicacionesDegradadas.ventanasEscucha.map(v => [
+      v.hora,
+      v.duracion,
+      v.canal,
+      v.protocolo,
+    ]);
+    secciones.push(crearTabla(['Hora', 'Duración', 'Canal', 'Protocolo'], ventFilas));
+  }
+
+  secciones.push(crearTitulo('Señales físicas', 2));
+  secciones.push(...crearListaNumerada(dossier.comunicacionesDegradadas.senalesFisicas));
+
+  // 12. PLAN DE AGUA
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('12. Plan de Agua', 1));
+  secciones.push(crearParrafo(`Consumo diario necesario: ${dossier.planAgua.consumoDiario}`));
+  secciones.push(crearParrafo(`Reserva actual: ${dossier.planAgua.reservaActual}`));
+  secciones.push(crearAlerta(`Autonomía estimada: ${dossier.planAgua.diasAutonomia}`, 'info'));
+
+  secciones.push(crearTitulo('Fases de racionamiento', 2));
+  const racionFilas = dossier.planAgua.fasesRacionamiento.map(f => [
+    f.fase,
+    f.litrosPorPersonaDia,
+    f.uso,
+    f.duracion,
+  ]);
+  secciones.push(crearTabla(['Fase', 'L/persona/día', 'Uso', 'Cuándo'], racionFilas));
+
+  secciones.push(crearTitulo('Fuentes alternativas de agua', 2));
+  secciones.push(...crearListaNumerada(dossier.planAgua.fuentesAlternativas));
+
+  secciones.push(crearTitulo('Métodos de potabilización', 2));
+  secciones.push(...crearListaNumerada(dossier.planAgua.metodosPotabilizacion));
+
+  secciones.push(crearTitulo('Consejos', 2));
+  secciones.push(...crearListaNumerada(dossier.planAgua.consejos));
+
+  // 13. RED DE VECINOS
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('13. Red de Vecinos', 1));
+  for (const instr of dossier.redVecinos.instrucciones) {
+    secciones.push(crearParrafo(instr));
+  }
+  secciones.push(crearTitulo('Protocolo vecinal', 2));
+  secciones.push(...crearListaNumerada(dossier.redVecinos.protocoloVecinal));
+
+  // 14. PAUTAS EMOCIONALES
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('14. Gestión Emocional en Emergencias', 1));
+
+  secciones.push(crearTitulo('Pautas generales', 2));
+  secciones.push(...crearListaNumerada(dossier.pautasEmocionales.pautasGenerales));
+
+  if (dossier.pautasEmocionales.pautasNinos) {
+    secciones.push(crearTitulo('Con niños pequeños', 2));
+    secciones.push(...crearListaNumerada(dossier.pautasEmocionales.pautasNinos));
+  }
+  if (dossier.pautasEmocionales.pautasMayores) {
+    secciones.push(crearTitulo('Con personas mayores', 2));
+    secciones.push(...crearListaNumerada(dossier.pautasEmocionales.pautasMayores));
+  }
+  if (dossier.pautasEmocionales.pautasAdolescentes) {
+    secciones.push(crearTitulo('Con adolescentes', 2));
+    secciones.push(...crearListaNumerada(dossier.pautasEmocionales.pautasAdolescentes));
+  }
+
+  secciones.push(crearTitulo('Señales de alerta psicológica', 2));
+  for (const senal of dossier.pautasEmocionales.senalesAlerta) {
+    secciones.push(crearAlerta(senal, 'peligro'));
+  }
+
+  // 15. DOCUMENTACIÓN
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('15. Documentación a Preparar', 1));
   secciones.push(crearParrafo('Asegúrate de tener copias (física + digital) de los siguientes documentos:'));
   secciones.push(
     ...crearChecklist(
@@ -299,9 +485,37 @@ export async function generarDossierDocx(
     )
   );
 
-  // 11. CALENDARIO DE REVISIÓN
+  // 16. ROTACIÓN DE SUMINISTROS
   secciones.push(crearSeparador());
-  secciones.push(crearTitulo('10. Calendario de Revisión', 1));
+  secciones.push(crearTitulo('16. Rotación y Caducidad de Suministros', 1));
+  secciones.push(crearParrafo('Calendario de revisión de tus suministros de emergencia:'));
+
+  const rotFilas = dossier.calendarioRotacion.items.map(item => [
+    item.item,
+    item.categoria,
+    item.vidaUtil,
+    item.frecuenciaRevision,
+    item.consejo,
+  ]);
+  secciones.push(crearTabla(['Item', 'Categoría', 'Vida útil', 'Revisión', 'Consejo'], rotFilas));
+
+  secciones.push(crearTitulo('Recordatorios semestrales', 2));
+  secciones.push(...crearChecklist(dossier.calendarioRotacion.recordatoriosSemestrales.map(r => ({ texto: r, marcado: false }))));
+
+  secciones.push(crearTitulo('Instrucciones de rotación', 2));
+  secciones.push(...crearListaNumerada(dossier.calendarioRotacion.instrucciones));
+
+  // 17. COPIA DIGITAL
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('17. Copia Digital del Plan', 1));
+  secciones.push(crearAlerta(`Código de identificación: ${dossier.infoDigital.codigoIdentificacion}`, 'info'));
+  for (const instr of dossier.infoDigital.instrucciones) {
+    secciones.push(crearParrafo(instr));
+  }
+
+  // 18. CALENDARIO DE REVISIÓN
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('18. Calendario de Revisión', 1));
   secciones.push(crearParrafo('Este plan debe revisarse cada 6 meses o cuando haya cambios significativos en el núcleo.'));
   secciones.push(
     crearTabla(

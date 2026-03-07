@@ -6,6 +6,7 @@ import { Interconexiones } from '../types/interconexiones';
 import { PlanGlobal } from '../types/dossier';
 import { analizarNucleo } from '../engine/analyzer';
 import { asignarRoles } from '../engine/roles';
+import { generarPlanSimulacros } from '../engine/simulacro';
 import {
   crearDocumento,
   crearPortada,
@@ -67,6 +68,7 @@ export function construirPlanGlobal(nucleos: NucleoBase[], inter: Interconexione
       nombre: nucleos.find(n => n.id === a.nucleoId)?.nombre || '',
       score: a.scorePreparacion,
     })),
+    simulacros: generarPlanSimulacros(nucleos, inter),
   };
 }
 
@@ -187,6 +189,24 @@ export async function generarPlanGlobalDocx(
     escFilas.push(['Pandemia', `Cuida niños: ${inter.escenarios.pandemia.nucleoCuidaNinos}`, inter.escenarios.pandemia.notas || '']);
   }
   secciones.push(crearTabla(['Escenario', 'Asignación clave', 'Notas'], escFilas));
+
+  // 9. PLAN DE SIMULACROS
+  secciones.push(crearSeparador());
+  secciones.push(crearTitulo('9. Plan de Simulacros', 1));
+  secciones.push(crearParrafo(`Frecuencia recomendada: ${plan.simulacros.frecuenciaRecomendada}`));
+
+  for (const ejercicio of plan.simulacros.ejercicios) {
+    secciones.push(crearTitulo(`${ejercicio.nombre} (${ejercicio.dificultad})`, 2));
+    secciones.push(crearParrafo(ejercicio.descripcion, { italic: true }));
+    secciones.push(crearParrafo(`Duración estimada: ${ejercicio.duracionEstimada}`));
+    secciones.push(crearTitulo('Pasos', 3));
+    secciones.push(...crearListaNumerada(ejercicio.pasos));
+    secciones.push(crearTitulo('Verificación', 3));
+    secciones.push(...crearListaNumerada(ejercicio.checklistVerificacion));
+  }
+
+  secciones.push(crearTitulo('Instrucciones para el coordinador', 2));
+  secciones.push(...crearListaNumerada(plan.simulacros.instruccionesCoordinador));
 
   // Generar
   const doc = crearDocumento('Plan Global — Coordinador', secciones);
