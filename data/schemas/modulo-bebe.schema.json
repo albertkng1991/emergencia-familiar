@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "modulo-bebe.schema.json",
+  "title": "Módulo Bebé/Niños Pequeños",
+  "description": "Datos adicionales para núcleos con bebés o niños menores de 6 años",
+  "type": "object",
+  "properties": {
+    "alimentacion": {
+      "type": "string",
+      "description": "Tipo de alimentación: lactancia materna, fórmula (marca/tipo), mixta"
+    },
+    "panales": {
+      "type": "string",
+      "description": "Talla y marca habitual de pañales, stock actual"
+    },
+    "portabebes": {
+      "type": "string",
+      "description": "Tipo de portabebés disponible: mochila, fular, etc."
+    },
+    "sillaCoche": {
+      "type": "string",
+      "description": "Grupo de la silla de coche (0, 0+, 1, 2, 3) y en qué vehículo está"
+    },
+    "guarderia": {
+      "type": ["object", "null"],
+      "properties": {
+        "nombre": { "type": "string" },
+        "direccion": { "type": "string" },
+        "telefono": { "type": "string" }
+      }
+    },
+    "cuidadoresAlternativos": {
+      "type": "array",
+      "description": "Personas que pueden hacerse cargo del bebé en emergencia",
+      "items": {
+        "type": "object",
+        "required": ["nombre", "telefono", "relacion"],
+        "properties": {
+          "nombre": { "type": "string" },
+          "telefono": { "type": "string" },
+          "relacion": { "type": "string" }
+        }
+      }
+    },
+    "medicacionInfantil": {
+      "type": "string",
+      "description": "Medicamentos habituales del bebé (Apiretal, etc.)"
+    },
+    "pediatra": {
+      "type": "object",
+      "properties": {
+        "nombre": { "type": "string" },
+        "telefono": { "type": "string" }
+      }
+    },
+    "alimentosEspecificos": {
+      "type": "string",
+      "description": "Marca de fórmula, potitos, cereales específicos"
+    },
+    "rutinaSueno": {
+      "type": "string",
+      "description": "Información sobre rutina de sueño para cuidadores alternativos"
+    }
+  }
+}

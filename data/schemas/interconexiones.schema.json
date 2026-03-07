@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "interconexiones.schema.json",
+  "title": "Interconexiones entre Núcleos",
+  "description": "Datos del coordinador sobre las relaciones y protocolos entre núcleos familiares",
+  "type": "object",
+  "required": ["nucleos", "distancias", "cadenaContacto", "puntosEncuentro", "escenarios"],
+  "properties": {
+    "nucleos": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string", "pattern": "^N\\d+$" }
+    },
+    "distancias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["de", "a", "km", "minutosCoche"],
+        "properties": {
+          "de": { "type": "string" },
+          "a": { "type": "string" },
+          "km": { "type": "number" },
+          "minutosCoche": { "type": "number" },
+          "minutosAPie": { "type": "number" }
+        }
+      }
+    },
+    "capacidadAcogida": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nucleoAnfitrion", "puedeAcogerA", "plazasExtra"],
+        "properties": {
+          "nucleoAnfitrion": { "type": "string" },
+          "puedeAcogerA": { "type": "array", "items": { "type": "string" } },
+          "plazasExtra": { "type": "number" },
+          "notas": { "type": "string" }
+        }
+      }
+    },
+    "recursosCompartidos": {
+      "type": "object",
+      "properties": {
+        "vehiculoGrande": { "type": "string" },
+        "generador": { "type": "string" },
+        "almacenaje": { "type": "string" },
+        "conocimientosClave": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["nucleo", "habilidad"],
+            "properties": {
+              "nucleo": { "type": "string" },
+              "habilidad": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "cadenaContacto": {
+      "type": "object",
+      "required": ["coordinadorPrincipal", "coordinadorSuplente"],
+      "properties": {
+        "coordinadorPrincipal": { "type": "string" },
+        "coordinadorSuplente": { "type": "string" },
+        "contactoEnlaceExterno": {
+          "type": "object",
+          "required": ["nombre", "telefono", "ciudad"],
+          "properties": {
+            "nombre": { "type": "string" },
+            "telefono": { "type": "string" },
+            "ciudad": { "type": "string" }
+          }
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nucleo", "rolPrincipal", "recursoQueAporta"],
+        "properties": {
+          "nucleo": { "type": "string" },
+          "rolPrincipal": { "type": "string" },
+          "recursoQueAporta": { "type": "string" }
+        }
+      }
+    },
+    "puntosEncuentro": {
+      "type": "object",
+      "required": ["global"],
+      "properties": {
+        "global": {
+          "type": "object",
+          "required": ["ubicacion"],
+          "properties": {
+            "ubicacion": { "type": "string" },
+            "comoLlegar": { "type": "string" }
+          }
+        },
+        "alternativo": {
+          "type": "object",
+          "properties": {
+            "ubicacion": { "type": "string" },
+            "comoLlegar": { "type": "string" }
+          }
+        },
+        "subfamiliar": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["nucleosImplicados", "ubicacion"],
+            "properties": {
+              "nucleosImplicados": { "type": "array", "items": { "type": "string" } },
+              "ubicacion": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "escenarios": {
+      "type": "object",
+      "required": ["apagon", "evacuacion", "conflicto", "pandemia"],
+      "properties": {
+        "apagon": {
+          "type": "object",
+          "properties": {
+            "nucleoMejorPreparado": { "type": "string" },
+            "notas": { "type": "string" }
+          }
+        },
+        "evacuacion": {
+          "type": "object",
+          "properties": {
+            "secuenciaRecogida": { "type": "array", "items": { "type": "string" } },
+            "destino": { "type": "string" },
+            "notas": { "type": "string" }
+          }
+        },
+        "conflicto": {
+          "type": "object",
+          "properties": {
+            "nucleoMasSeguro": { "type": "string" },
+            "notas": { "type": "string" }
+          }
+        },
+        "pandemia": {
+          "type": "object",
+          "properties": {
+            "nucleoCuidaNinos": { "type": "string" },
+            "notas": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

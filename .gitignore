@@ -1,0 +1,17 @@
+node_modules/
+dist/
+
+# Datos sensibles de núcleos familiares
+data/nucleos/*.json
+!data/nucleos/_plantilla.json
+data/interconexiones.json
+
+# Documentos generados
+output/
+
+# Variables de entorno
+.env
+
+# OS
+.DS_Store
+Thumbs.db

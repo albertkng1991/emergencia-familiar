@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "modulo-mayores.schema.json",
+  "title": "Módulo Personas Mayores",
+  "description": "Datos adicionales para núcleos con personas mayores dependientes o con necesidades especiales",
+  "type": "object",
+  "properties": {
+    "movilidad": {
+      "type": "string",
+      "description": "Nivel de movilidad: autónomo, bastón, andador, silla de ruedas, encamado"
+    },
+    "medicacionDetallada": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["nombre", "dosis", "frecuencia", "esencial"],
+        "properties": {
+          "nombre": { "type": "string" },
+          "dosis": { "type": "string" },
+          "frecuencia": { "type": "string" },
+          "esencial": { "type": "boolean", "description": "true si sin ella hay riesgo vital" }
+        }
+      }
+    },
+    "aparatosElectricosMedicos": {
+      "type": "array",
+      "description": "CPAP, concentrador oxígeno, etc.",
+      "items": {
+        "type": "object",
+        "required": ["aparato"],
+        "properties": {
+          "aparato": { "type": "string" },
+          "autonomiaBateria": { "type": "string" },
+          "alternativa": { "type": "string" }
+        }
+      }
+    },
+    "deterioroCognitivo": {
+      "type": "string",
+      "description": "Nivel y tipo: ninguno, leve, moderado, Alzheimer, etc."
+    },
+    "capacidadEvacuacion": {
+      "type": "string",
+      "description": "Puede caminar X metros, necesita ayuda para escaleras, etc."
+    },
+    "cuidadorPrincipal": {
+      "type": "string",
+      "description": "Nombre de la persona que se encarga habitualmente"
+    },
+    "centroSalud": {
+      "type": "object",
+      "properties": {
+        "nombre": { "type": "string" },
+        "telefono": { "type": "string" },
+        "direccion": { "type": "string" }
+      }
+    },
+    "dependencia": {
+      "type": "string",
+      "description": "Grado de dependencia reconocido, si aplica"
+    }
+  }
+}

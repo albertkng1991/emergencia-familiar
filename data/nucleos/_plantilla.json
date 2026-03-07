@@ -1,0 +1,90 @@
+{
+  "id": "",
+  "nombre": "",
+  "modulosAdicionales": [],
+
+  "miembros": [
+    {
+      "nombre": "",
+      "edad": 0,
+      "dni": "",
+      "grupoSanguineo": "",
+      "telefono": "",
+      "alergias": "",
+      "medicacionFija": "",
+      "condicionesMedicas": "",
+      "parentesco": ""
+    }
+  ],
+
+  "vivienda": {
+    "direccion": "",
+    "tipo": "",
+    "planta": null,
+    "ascensor": null,
+    "garaje": "",
+    "trastero": "",
+    "llavesPaso": {
+      "agua": "",
+      "electricidad": "",
+      "gas": ""
+    },
+    "espacioExterior": "",
+    "habitacionSegura": ""
+  },
+
+  "transporte": {
+    "vehiculos": [],
+    "conductores": [],
+    "bicicletas": 0
+  },
+
+  "recursos": {
+    "conocimientosUtiles": [],
+    "herramientas": [],
+    "armasCaza": "",
+    "huertoAnimales": "",
+    "propiedadSecundaria": null
+  },
+
+  "finanzas": {
+    "fondoEmergencia": "",
+    "efectivoCasa": "",
+    "seguros": []
+  },
+
+  "suministros": {
+    "comidaNoPerecedera": "",
+    "aguaAlmacenada": "",
+    "botiquin": "",
+    "iluminacion": "",
+    "cocinaAlternativa": "",
+    "copiasDocumentos": ""
+  },
+
+  "comunicaciones": {
+    "moviles": [
+      { "nombre": "", "numero": "", "operador": "" }
+    ],
+    "telefonoFijo": "",
+    "apps": [],
+    "walkieTalkies": false,
+    "radioEmergencia": false,
+    "powerbanks": ""
+  },
+
+  "entorno": {
+    "zona": "",
+    "riesgosNaturales": [],
+    "supermercadosCercanos": "",
+    "farmaciasCercanas": "",
+    "hospitalCercano": { "nombre": "", "distancia": "" },
+    "vecinosConfianza": ""
+  },
+
+  "preferencias": {
+    "escenarioPreocupante": "",
+    "peticionesEspecificas": "",
+    "mascotas": []
+  }
+}

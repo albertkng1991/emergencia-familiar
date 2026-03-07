@@ -1,0 +1,26 @@
+{
+  "name": "family-emergency-plan",
+  "version": "1.0.0",
+  "description": "Sistema de generación de planes de emergencia familiar coordinados",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "nuevo": "ts-node src/cli.ts nuevo",
+    "validar": "ts-node src/cli.ts validar",
+    "generar": "ts-node src/cli.ts generar",
+    "estado": "ts-node src/cli.ts estado",
+    "start": "ts-node src/cli.ts"
+  },
+  "keywords": ["emergency", "family", "plan", "dossier"],
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "commander": "^12.1.0",
+    "docx": "^8.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

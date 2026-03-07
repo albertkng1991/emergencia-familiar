@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "nucleo-base.schema.json",
+  "title": "Núcleo Familiar Base",
+  "description": "Esquema del cuestionario base para cada núcleo familiar",
+  "type": "object",
+  "required": ["id", "nombre", "miembros", "vivienda", "comunicaciones"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^N\\d+$",
+      "description": "Identificador del núcleo: N1, N2, etc."
+    },
+    "nombre": {
+      "type": "string",
+      "description": "Nombre descriptivo del núcleo: 'Carlos + María + Lucas'"
+    },
+    "modulosAdicionales": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["bebe", "mayores", "jovenes"] },
+      "description": "Módulos adicionales que aplican a este núcleo"
+    },
+    "miembros": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["nombre", "edad", "parentesco"],
+        "properties": {
+          "nombre": { "type": "string" },
+          "edad": { "type": "number", "minimum": 0 },
+          "dni": { "type": "string" },
+          "grupoSanguineo": { "type": "string" },
+          "telefono": { "type": "string" },
+          "alergias": { "type": "string" },
+          "medicacionFija": { "type": "string" },
+          "condicionesMedicas": { "type": "string" },
+          "parentesco": { "type": "string" }
+        }
+      }
+    },
+    "vivienda": {
+      "type": "object",
+      "required": ["direccion", "tipo"],
+      "properties": {
+        "direccion": { "type": "string" },
+        "tipo": { "type": "string" },
+        "planta": { "type": "number" },
+        "ascensor": { "type": "boolean" },
+        "garaje": { "type": "string" },
+        "trastero": { "type": "string" },
+        "llavesPaso": {
+          "type": "object",
+          "properties": {
+            "agua": { "type": "string" },
+            "electricidad": { "type": "string" },
+            "gas": { "type": "string" }
+          }
+        },
+        "espacioExterior": { "type": "string" },
+        "habitacionSegura": { "type": "string" }
+      }
+    },
+    "transporte": {
+      "type": "object",
+      "properties": {
+        "vehiculos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tipo", "plazas"],
+            "properties": {
+              "tipo": { "type": "string" },
+              "modelo": { "type": "string" },
+              "plazas": { "type": "number" },
+              "ubicacion": { "type": "string" },
+              "todoterreno": { "type": "boolean" }
+            }
+          }
+        },
+        "conductores": { "type": "array", "items": { "type": "string" } },
+        "bicicletas": { "type": "number" }
+      }
+    },
+    "recursos": {
+      "type": "object",
+      "properties": {
+        "conocimientosUtiles": { "type": "array", "items": { "type": "string" } },
+        "herramientas": { "type": "array", "items": { "type": "string" } },
+        "armasCaza": { "type": "string" },
+        "huertoAnimales": { "type": "string" },
+        "propiedadSecundaria": {
+          "type": ["object", "null"],
+          "properties": {
+            "tipo": { "type": "string" },
+            "ubicacion": { "type": "string" },
+            "descripcion": { "type": "string" }
+          }
+        }
+      }
+    },
+    "finanzas": {
+      "type": "object",
+      "properties": {
+        "fondoEmergencia": { "type": "string" },
+        "efectivoCasa": { "type": "string" },
+        "seguros": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "suministros": {
+      "type": "object",
+      "properties": {
+        "comidaNoPerecedera": { "type": "string" },
+        "aguaAlmacenada": { "type": "string" },
+        "botiquin": { "type": "string" },
+        "iluminacion": { "type": "string" },
+        "cocinaAlternativa": { "type": "string" },
+        "copiasDocumentos": { "type": "string" }
+      }
+    },
+    "comunicaciones": {
+      "type": "object",
+      "required": ["moviles", "apps"],
+      "properties": {
+        "moviles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["nombre", "numero"],
+            "properties": {
+              "nombre": { "type": "string" },
+              "numero": { "type": "string" },
+              "operador": { "type": "string" }
+            }
+          }
+        },
+        "telefonoFijo": { "type": "string" },
+        "apps": { "type": "array", "items": { "type": "string" } },
+        "walkieTalkies": { "type": "boolean" },
+        "radioEmergencia": { "type": "boolean" },
+        "powerbanks": { "type": "string" }
+      }
+    },
+    "entorno": {
+      "type": "object",
+      "properties": {
+        "zona": { "type": "string" },
+        "riesgosNaturales": { "type": "array", "items": { "type": "string" } },
+        "supermercadosCercanos": { "type": "string" },
+        "farmaciasCercanas": { "type": "string" },
+        "hospitalCercano": {
+          "type": "object",
+          "properties": {
+            "nombre": { "type": "string" },
+            "distancia": { "type": "string" }
+          }
+        },
+        "vecinosConfianza": { "type": "string" }
+      }
+    },
+    "preferencias": {
+      "type": "object",
+      "properties": {
+        "escenarioPreocupante": { "type": "string" },
+        "peticionesEspecificas": { "type": "string" },
+        "mascotas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tipo"],
+            "properties": {
+              "tipo": { "type": "string" },
+              "nombre": { "type": "string" },
+              "necesidades": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "moduloBebe": { "$ref": "modulo-bebe.schema.json" },
+    "moduloMayores": { "$ref": "modulo-mayores.schema.json" },
+    "moduloJovenes": { "$ref": "modulo-jovenes.schema.json" }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "modulo-jovenes.schema.json",
+  "title": "Módulo Jóvenes/Adolescentes",
+  "description": "Datos adicionales para núcleos con adolescentes (12-17 años)",
+  "type": "object",
+  "properties": {
+    "autonomia": {
+      "type": "string",
+      "description": "Nivel de autonomía: puede estar solo en casa, se desplaza solo por el barrio, etc."
+    },
+    "movilPropio": {
+      "type": "boolean",
+      "description": "Tiene teléfono móvil propio"
+    },
+    "conocimientos": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Conocimientos útiles: primeros auxilios, orientación, mecánica, etc."
+    },
+    "horarios": {
+      "type": "string",
+      "description": "Horarios habituales fuera de casa (instituto, actividades)"
+    },
+    "carnet": {
+      "type": "boolean",
+      "description": "Tiene carnet de conducir (ciclomotor/coche)"
+    },
+    "rolActivo": {
+      "type": "string",
+      "description": "Rol que puede asumir en emergencia: mensajero, cuidar hermanos pequeños, etc."
+    },
+    "centroEstudios": {
+      "type": "object",
+      "properties": {
+        "nombre": { "type": "string" },
+        "direccion": { "type": "string" },
+        "telefono": { "type": "string" }
+      }
+    }
+  }
+}
