@@ -1280,7 +1280,7 @@ function addMiembro() {
       <div class="field-row">
         <div class="field">
           <label class="required">Nombre completo</label>
-          <span class="hint">Nombre y apellidos tal como aparecen en el DNI.</span>
+          <span class="hint">Nombre y apellidos.</span>
           <input type="text" id="m${n}_nombre">
         </div>
         <div class="field">
@@ -1299,16 +1299,11 @@ function addMiembro() {
           </select>
         </div>
       </div>
-      <div class="field-row-3">
+      <div class="field-row">
         <div class="field">
           <label class="required">Edad</label>
           <span class="hint">Años cumplidos.</span>
           <input type="number" id="m${n}_edad" min="0">
-        </div>
-        <div class="field">
-          <label>DNI / NIE</label>
-          <span class="hint">Número de documento de identidad.</span>
-          <input type="text" id="m${n}_dni">
         </div>
         <div class="field">
           <label>Grupo sanguíneo</label>
@@ -1650,7 +1645,6 @@ function collectMiembros() {
       nombre,
       edad: valNum(`m${id}_edad`),
       parentesco: val(`m${id}_parentesco`),
-      dni: val(`m${id}_dni`) || undefined,
       grupoSanguineo: val(`m${id}_sangre`) || undefined,
       telefono: val(`m${id}_telefono`) || undefined,
       alergias: val(`m${id}_alergias`) || undefined,
