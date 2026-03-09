@@ -81,6 +81,17 @@ if (DATABASE_URL) {
         };
       });
     },
+
+    async get(id) {
+      const result = await pool.query('SELECT data FROM nucleos WHERE id = $1', [id]);
+      if (result.rows.length === 0) return null;
+      return typeof result.rows[0].data === 'string' ? JSON.parse(result.rows[0].data) : result.rows[0].data;
+    },
+
+    async getAll() {
+      const result = await pool.query('SELECT id, data FROM nucleos ORDER BY (SUBSTRING(id FROM 2))::int');
+      return result.rows.map(row => typeof row.data === 'string' ? JSON.parse(row.data) : row.data);
+    },
   };
 
 } else {
@@ -133,6 +144,20 @@ if (DATABASE_URL) {
         } catch { return null; }
       }).filter(Boolean);
     },
+
+    async get(id) {
+      const filePath = path.join(NUCLEOS_DIR, `${id}.json`);
+      if (!fs.existsSync(filePath)) return null;
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    },
+
+    async getAll() {
+      const files = fs.readdirSync(NUCLEOS_DIR).filter(f => /^N\d+\.json$/.test(f));
+      return files.map(f => {
+        try { return JSON.parse(fs.readFileSync(path.join(NUCLEOS_DIR, f), 'utf-8')); }
+        catch { return null; }
+      }).filter(Boolean);
+    },
   };
 }
 
@@ -183,6 +208,46 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ error: 'Error al procesar los datos.' }));
       }
     });
+    return;
+  }
+
+  // GET /api/nucleo/:id — full data for one nucleus
+  const nucleoMatch = req.url.match(/^\/api\/nucleo\/(N\d+)$/);
+  if (req.method === 'GET' && nucleoMatch) {
+    try {
+      const data = await storage.get(nucleoMatch[1]);
+      if (!data) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'No encontrado.' }));
+        return;
+      }
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="${nucleoMatch[1]}.json"`,
+      });
+      res.end(JSON.stringify(data, null, 2));
+    } catch (e) {
+      console.error('Error al obtener núcleo:', e.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Error interno.' }));
+    }
+    return;
+  }
+
+  // GET /api/descargar-todo — all nuclei as JSON array
+  if (req.method === 'GET' && req.url === '/api/descargar-todo') {
+    try {
+      const all = await storage.getAll();
+      res.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Content-Disposition': 'attachment; filename="nucleos-todos.json"',
+      });
+      res.end(JSON.stringify(all, null, 2));
+    } catch (e) {
+      console.error('Error al descargar todo:', e.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Error interno.' }));
+    }
     return;
   }
 

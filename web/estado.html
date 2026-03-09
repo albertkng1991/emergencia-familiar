@@ -128,6 +128,33 @@
       margin-right: 5px;
       vertical-align: middle;
     }
+    .download-btn {
+      display: inline-block;
+      padding: 4px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 6px;
+      background: white;
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      color: #64748b;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .download-btn:hover { border-color: #2563eb; color: #2563eb; }
+    .download-all-btn {
+      padding: 8px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      font-family: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: #64748b;
+      margin-left: 8px;
+    }
+    .download-all-btn:hover { border-color: #16a34a; color: #16a34a; }
+    .header-buttons { display: flex; gap: 8px; }
     @media (max-width: 500px) {
       .stats { grid-template-columns: 1fr; }
     }
@@ -140,7 +167,10 @@
         <h1>Panel del Coordinador</h1>
         <p class="subtitle">Formularios recibidos de los núcleos familiares</p>
       </div>
-      <button class="refresh-btn" onclick="load()">Actualizar</button>
+      <div class="header-buttons">
+        <button class="refresh-btn" onclick="load()">Actualizar</button>
+        <button class="download-all-btn" id="btn-descargar-todo" style="display:none" onclick="descargarTodo()">Descargar todo</button>
+      </div>
     </div>
     <div id="content"></div>
   </div>
@@ -256,13 +286,22 @@
                 </div>
                 <span class="status-badge ${statusBadgeClass[n.status]}">${n.label}</span>
               </div>
+              <a class="download-btn" href="/api/nucleo/${n.id}" download="${n.id}.json">Descargar</a>
             </div>`;
         }
 
         el.innerHTML = html;
+        document.getElementById('btn-descargar-todo').style.display = '';
       } catch (err) {
         el.innerHTML = `<div class="empty"><p>Error al cargar los datos.</p></div>`;
       }
+    }
+
+    function descargarTodo() {
+      const a = document.createElement('a');
+      a.href = '/api/descargar-todo';
+      a.download = 'nucleos-todos.json';
+      a.click();
     }
 
     load();
