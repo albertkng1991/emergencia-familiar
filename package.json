@@ -9,14 +9,22 @@
     "validar": "ts-node src/cli.ts validar",
     "generar": "ts-node src/cli.ts generar",
     "estado": "ts-node src/cli.ts estado",
-    "start": "ts-node src/cli.ts"
+    "start": "ts-node src/cli.ts",
+    "web": "node web/server.js",
+    "online": "bash web/start.sh"
   },
-  "keywords": ["emergency", "family", "plan", "dossier"],
+  "keywords": [
+    "emergency",
+    "family",
+    "plan",
+    "dossier"
+  ],
   "license": "MIT",
   "dependencies": {
     "ajv": "^8.12.0",
     "commander": "^12.1.0",
-    "docx": "^8.5.0"
+    "docx": "^8.5.0",
+    "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

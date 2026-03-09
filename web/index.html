@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plan de Emergencia Familiar — Cuestionario</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --text-muted: #94a3b8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #f59e0b;
+      --info-bg: #eff6ff;
+      --info-border: #bfdbfe;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 10px;
+    }
+    header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    header p { color: var(--text-light); font-size: 0.95rem; max-width: 500px; margin: 0 auto; }
+
+    .intro-box {
+      background: var(--info-bg);
+      border: 1.5px solid var(--info-border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin: 20px auto 30px;
+      max-width: 740px;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .intro-box strong { color: var(--primary-dark); }
+
+    /* Progress bar */
+    .progress-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 30px;
+      padding: 0 4px;
+    }
+    .progress-step {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      transition: background 0.3s;
+      cursor: pointer;
+    }
+    .progress-step.active { background: var(--primary); }
+    .progress-step.completed { background: var(--success); }
+    .progress-labels {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      padding: 0 4px;
+    }
+    .progress-label {
+      flex: 1;
+      font-size: 0.65rem;
+      text-align: center;
+      color: var(--text-light);
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .progress-label.active { color: var(--primary); font-weight: 600; }
+
+    /* Sections */
+    .form-section {
+      display: none;
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      animation: fadeIn 0.3s ease;
+    }
+    .form-section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+    .section-subtitle {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .section-info {
+      background: var(--info-bg);
+      border-left: 3px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Form elements */
+    .field {
+      margin-bottom: 20px;
+    }
+    .field label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.88rem;
+      margin-bottom: 4px;
+    }
+    .field .hint {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: white;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .field textarea { resize: vertical; min-height: 70px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .required::after {
+      content: " *";
+      color: var(--danger);
+    }
+
+    /* Toggle chips */
+    .toggle-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .toggle-chip {
+      padding: 6px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .toggle-chip:hover { border-color: var(--primary); }
+    .toggle-chip.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Repeatable items */
+    .item-list { margin-bottom: 12px; }
+    .item-card {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 10px;
+      position: relative;
+      background: #fafbfc;
+    }
+    .item-card .item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .item-card .item-header h4 {
+      font-size: 0.9rem;
+      color: var(--primary-dark);
+    }
+
+    .btn-remove {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .btn-remove:hover { background: #fef2f2; }
+
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border: 1.5px dashed var(--primary);
+      border-radius: 8px;
+      background: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-add:hover { background: #eff6ff; }
+
+    /* Navigation */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .btn {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    .btn-success:hover { background: #15803d; }
+
+    /* Module toggles */
+    .module-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .module-toggle:hover { border-color: var(--primary); }
+    .module-toggle.active {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+    .module-toggle input { display: none; }
+    .module-toggle .check {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .module-toggle.active .check {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .module-toggle.active .check::after {
+      content: "\2713";
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .module-info h4 { font-size: 0.95rem; }
+    .module-info p { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; }
+
+    /* Bool toggle */
+    .bool-toggle {
+      display: flex;
+      gap: 8px;
+    }
+    .bool-toggle .toggle-chip {
+      padding: 6px 20px;
+    }
+
+    /* Sub-section divider */
+    .subsection {
+      margin-top: 28px;
+      margin-bottom: 16px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .subsection h3 {
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+    .subsection p {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    /* Success screen */
+    .success-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .success-screen .icon {
+      width: 80px;
+      height: 80px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 2.5rem;
+      color: var(--success);
+    }
+    .success-screen h2 { margin-bottom: 10px; }
+    .success-screen p { color: var(--text-light); margin-bottom: 30px; }
+
+    /* Review */
+    .review-block {
+      padding: 14px 18px;
+      background: var(--bg);
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .review-block h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .review-block p { font-size: 0.9rem; }
+    .review-warning {
+      color: var(--danger);
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 12px; }
+      .form-section { padding: 20px 16px; }
+      .field-row, .field-row-3 { grid-template-columns: 1fr; }
+      header h1 { font-size: 1.4rem; }
+      .progress-labels { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Plan de Emergencia Familiar</h1>
+  <p>Cuestionario para recoger los datos de tu núcleo familiar</p>
+</header>
+
+<div class="intro-box container">
+  Este cuestionario recoge la información necesaria para generar tu <strong>plan de emergencia familiar personalizado</strong>.
+  Tarda unos 15-20 minutos. No te preocupes si no sabes algún dato: puedes dejar campos en blanco y completarlos después.
+  <br><br>
+  <strong>Privacidad:</strong> Al terminar, tus datos se envían directamente al coordinador del plan. No se almacenan en ningún servidor externo.
+</div>
+
+<div class="container">
+  <div class="progress-labels" id="progressLabels"></div>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 0: Identificación -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section active" data-step="0">
+    <h2 class="section-title">¿Quién sois?</h2>
+    <p class="section-subtitle">Primero necesitamos saber quién vive en vuestro hogar. Pon los nombres de los adultos y niños que convivís.</p>
+
+    <div class="field">
+      <label class="required">Vuestra familia</label>
+      <span class="hint">Escribe los nombres de las personas que vivís juntas. Esto nos ayuda a identificar rápidamente a cada familia dentro del plan.</span>
+      <input type="text" id="nucleoNombre" placeholder="Ej: Carlos, María y Lucas">
+    </div>
+
+    <div class="subsection">
+      <h3>Módulos adicionales</h3>
+      <p>Si en tu hogar vive alguna persona con necesidades especiales, activa los módulos correspondientes. Aparecerán pasos adicionales en el formulario con preguntas específicas.</p>
+    </div>
+    <div class="module-toggle" data-module="bebe">
+      <div class="check"></div>
+      <div class="module-info">
+        <h4>Bebés o niños pequeños (0-5 años)</h4>
+        <p>Preguntas sobre alimentación, pañales, silla de coche, guardería, cuidadores alternativos, pediatra y rutina de sueño.</p>
+      </div>
+    </div>
+    <div class="module-toggle" data-module="mayores">
+      <div class="check"></div>
+      <div class="module-info">
+        <h4>Personas mayores o dependientes</h4>
+        <p>Preguntas sobre movilidad, medicación detallada, aparatos médicos eléctricos, deterioro cognitivo y capacidad de evacuación.</p>
+      </div>
+    </div>
+    <div class="module-toggle" data-module="jovenes">
+      <div class="check"></div>
+      <div class="module-info">
+        <h4>Adolescentes (12-17 años)</h4>
+        <p>Preguntas sobre nivel de autonomía, horarios fuera de casa, conocimientos útiles, rol que pueden asumir en emergencia.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 1: Miembros -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="1">
+    <h2 class="section-title">Miembros del hogar</h2>
+    <p class="section-subtitle">Lista de <strong>todas las personas que viven habitualmente</strong> en vuestra casa. Incluye a todos: adultos, niños, abuelos que convivan con vosotros, etc.</p>
+
+    <div class="section-info">
+      Rellena una ficha por cada persona. Si no sabes algún dato (como el grupo sanguíneo), no pasa nada: déjalo en blanco y complétalo cuando lo averigüéis. Los campos marcados con <strong style="color:var(--danger);">*</strong> son obligatorios.
+    </div>
+
+    <div class="item-list" id="miembrosList"></div>
+    <button class="btn-add" onclick="addMiembro()">+ Añadir otro miembro</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 2: Vivienda -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="2">
+    <h2 class="section-title">Vivienda</h2>
+    <p class="section-subtitle">Datos de la casa donde vivís. Esta información es importante para planificar evacuaciones, cortes de suministro y refugio en el hogar.</p>
+
+    <div class="field">
+      <label class="required">Dirección completa</label>
+      <span class="hint">Incluye calle, número, piso/puerta, código postal y ciudad. Cuanto más precisa, mejor.</span>
+      <input type="text" id="viv_direccion" placeholder="Ej: Calle Mayor 15, 3ºB, 28001 Madrid">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label class="required">Tipo de vivienda</label>
+        <span class="hint">El tipo de edificación donde vivís.</span>
+        <select id="viv_tipo">
+          <option value="">Seleccionar...</option>
+          <option value="piso">Piso / Apartamento</option>
+          <option value="adosado">Adosado / Pareado</option>
+          <option value="chalet">Chalet / Casa independiente</option>
+          <option value="casa_pueblo">Casa de pueblo</option>
+          <option value="atico">Ático</option>
+          <option value="bajo">Bajo / Planta baja</option>
+          <option value="duplex">Dúplex</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Planta</label>
+        <span class="hint">Número de planta. Déjalo vacío si es una casa.</span>
+        <input type="number" id="viv_planta" placeholder="Ej: 3" min="0">
+      </div>
+    </div>
+    <div class="field">
+      <label>¿Tiene ascensor?</label>
+      <span class="hint">Importante para evacuaciones, especialmente si hay personas con movilidad reducida.</span>
+      <div class="bool-toggle" data-field="viv_ascensor">
+        <span class="toggle-chip" data-val="true">Sí</span>
+        <span class="toggle-chip" data-val="false">No</span>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Garaje</label>
+        <span class="hint">¿Dónde está aparcado el coche? Planta, acceso...</span>
+        <input type="text" id="viv_garaje" placeholder="Ej: Garaje comunitario planta -2, plaza 45">
+      </div>
+      <div class="field">
+        <label>Trastero</label>
+        <span class="hint">¿Tenéis trastero? ¿Dónde está?</span>
+        <input type="text" id="viv_trastero" placeholder="Ej: Planta -1, trastero 12">
+      </div>
+    </div>
+    <div class="field">
+      <label>Espacio exterior</label>
+      <span class="hint">¿Tenéis balcón, terraza, jardín, patio? Puede ser útil para señalización o refugio al aire libre.</span>
+      <input type="text" id="viv_exterior" placeholder="Ej: Balcón de 3m² al patio interior, terraza de 15m² orientada al sur">
+    </div>
+    <div class="field">
+      <label>Habitación segura</label>
+      <span class="hint">Una habitación interior sin ventanas (o con pocas) donde podríais refugiaros en caso de catástrofe. Ideal: un baño interior, vestidor o despensa.</span>
+      <input type="text" id="viv_segura" placeholder="Ej: Baño interior sin ventanas, 4m²">
+    </div>
+
+    <div class="subsection">
+      <h3>Llaves de paso y cortes de suministro</h3>
+      <p>En una emergencia puede ser necesario cortar el agua, la luz o el gas rápidamente. Indica <strong>exactamente dónde</strong> están las llaves o cuadros de corte para que cualquier miembro de la familia pueda encontrarlas.</p>
+    </div>
+    <div class="field">
+      <label>Llave de paso del agua</label>
+      <span class="hint">¿Dónde está la llave que corta todo el agua de la casa?</span>
+      <input type="text" id="viv_agua" placeholder="Ej: Debajo del fregadero de la cocina, llave roja a la derecha">
+    </div>
+    <div class="field">
+      <label>Cuadro eléctrico</label>
+      <span class="hint">¿Dónde está el cuadro general de la electricidad? El interruptor principal (diferencial) corta toda la casa.</span>
+      <input type="text" id="viv_electricidad" placeholder="Ej: En la entrada, dentro del armario de la izquierda, a la altura de los ojos">
+    </div>
+    <div class="field">
+      <label>Llave del gas</label>
+      <span class="hint">¿Dónde se cierra el gas? Si no tenéis gas, indica "No aplica".</span>
+      <input type="text" id="viv_gas" placeholder="Ej: En la fachada exterior junto a la puerta, llave amarilla. / No aplica">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 3: Transporte -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="3">
+    <h2 class="section-title">Transporte</h2>
+    <p class="section-subtitle">Vehículos disponibles y capacidad de desplazamiento de la familia. Esto es clave para planificar evacuaciones y rutas.</p>
+
+    <div class="section-info">
+      Añade <strong>todos los vehículos</strong> que tengáis: coches, motos, furgonetas... Incluso si son compartidos. Si no tenéis vehículo, pasa al siguiente paso.
+    </div>
+
+    <div class="item-list" id="vehiculosList"></div>
+    <button class="btn-add" onclick="addVehiculo()">+ Añadir vehículo</button>
+
+    <div class="subsection">
+      <h3>Conductores y otros medios</h3>
+      <p>¿Quién puede conducir y qué otros medios de transporte tenéis?</p>
+    </div>
+    <div class="field">
+      <label>Personas con carnet de conducir</label>
+      <span class="hint">Nombres de todos los miembros de la familia que pueden conducir. Separa los nombres con comas.</span>
+      <input type="text" id="trans_conductores" placeholder="Ej: Carlos, María">
+    </div>
+    <div class="field">
+      <label>Número total de bicicletas</label>
+      <span class="hint">Las bicis pueden ser útiles si las carreteras están cortadas o no hay combustible.</span>
+      <input type="number" id="trans_bicicletas" placeholder="0" min="0">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 4: Recursos -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="4">
+    <h2 class="section-title">Recursos y capacidades</h2>
+    <p class="section-subtitle">Habilidades, herramientas y propiedades que pueden ser valiosas para toda la red familiar en una emergencia.</p>
+
+    <div class="field">
+      <label>Conocimientos útiles en la familia</label>
+      <span class="hint">¿Alguien en la familia tiene formación o experiencia que podría ser útil? Ejemplos: médico, enfermera, electricista, fontanero, mecánico, primeros auxilios, agricultura, radioaficionado, bombero... Separa con comas.</span>
+      <textarea id="rec_conocimientos" placeholder="Ej: María es enfermera, Carlos tiene curso de primeros auxilios de Cruz Roja, el abuelo sabe de fontanería y electricidad básica" rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Herramientas disponibles</label>
+      <span class="hint">Herramientas que tengáis en casa, garaje o trastero. Caja de herramientas completa, generador eléctrico, motosierra, escalera, bomba de agua, cuerda, hacha... Separa con comas.</span>
+      <textarea id="rec_herramientas" placeholder="Ej: Caja de herramientas completa, taladro, escalera de 3m, generador de gasolina 2kW, cuerda de 20m" rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Licencia de caza / armas</label>
+      <span class="hint">¿Alguien tiene licencia de armas o de caza? Indica qué tipo. Si no, déjalo vacío.</span>
+      <input type="text" id="rec_armas" placeholder="Ej: Carlos tiene licencia de caza, escopeta del 12">
+    </div>
+    <div class="field">
+      <label>Huerto, animales u otros recursos de autoabastecimiento</label>
+      <span class="hint">¿Cultiváis algo? ¿Tenéis gallinas, colmenas, frutales? Todo lo que pueda aportar alimento o recursos propios.</span>
+      <textarea id="rec_huerto" placeholder="Ej: Huerto de 50m² con tomates y lechugas (solo en verano), 6 gallinas ponedoras en la casa del pueblo" rows="2"></textarea>
+    </div>
+
+    <div class="subsection">
+      <h3>Otras propiedades</h3>
+      <p>¿Tenéis acceso a alguna otra vivienda (casa del pueblo, finca, apartamento en la playa, casa de campo...)? Pueden servir como punto de evacuación o refugio alternativo. Añade todas las que tengáis.</p>
+    </div>
+    <div class="item-list" id="propiedadesList"></div>
+    <button class="btn-add" onclick="addPropiedad()">+ Añadir otra propiedad</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 5: Suministros -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="5">
+    <h2 class="section-title">Suministros actuales</h2>
+    <p class="section-subtitle">¿Qué tenéis ya almacenado en casa? No te preocupes si es poco: el plan os ayudará a mejorar vuestra preparación. Sé sincero para que el plan sea realista.</p>
+
+    <div class="field">
+      <label>Comida no perecedera</label>
+      <span class="hint">Conservas, arroz, pasta, legumbres, frutos secos, galletas... Estima para cuántas personas y cuántos días os duraría sin ir a comprar.</span>
+      <textarea id="sum_comida" placeholder="Ej: Bastantes conservas (atún, legumbres, tomate), arroz 2kg, pasta 3kg, galletas. Estimamos unos 4-5 días para 3 personas." rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Agua almacenada</label>
+      <span class="hint">Agua embotellada que tengáis en casa ahora mismo. Se recomienda un mínimo de 2 litros por persona y día para 3 días (= 6L por persona).</span>
+      <input type="text" id="sum_agua" placeholder="Ej: Unas 10 botellas de 1.5L (15 litros en total)">
+    </div>
+    <div class="field">
+      <label>Botiquín de primeros auxilios</label>
+      <span class="hint">¿Tenéis un botiquín en casa? ¿Qué contiene aproximadamente?</span>
+      <select id="sum_botiquin">
+        <option value="">Seleccionar...</option>
+        <option value="completo">Completo (vendas, gasas, antiséptico, tijeras, pinzas, termómetro, analgésicos, antiinflamatorios...)</option>
+        <option value="basico">Básico (tiritas, paracetamol, ibuprofeno, algo de antiséptico)</option>
+        <option value="minimo">Mínimo (solo tiritas y algún medicamento suelto)</option>
+        <option value="ninguno">No tenemos botiquín</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Iluminación de emergencia</label>
+      <span class="hint">¿Qué tenéis para iluminaros si se va la luz? Linternas (¿con pilas?), velas, farol de camping, luz frontal...</span>
+      <textarea id="sum_iluminacion" placeholder="Ej: 1 linterna grande con pilas, 2 frontales de montaña, paquete de velas, mechero" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <label>Cocina alternativa</label>
+      <span class="hint">¿Podríais cocinar sin electricidad ni gas de red? Camping gas, barbacoa, hornillo de alcohol, cocina de leña...</span>
+      <input type="text" id="sum_cocina" placeholder="Ej: Camping gas con 2 bombonas de recambio, barbacoa de carbón en la terraza">
+    </div>
+    <div class="field">
+      <label>Copias de documentos importantes</label>
+      <span class="hint">¿Tenéis copias de seguridad de los documentos importantes (DNI, pasaportes, escrituras, seguros, cartilla sanitaria...)? ¿Dónde están guardadas? Puede ser un USB, una carpeta en la nube, o copias físicas en casa de un familiar.</span>
+      <textarea id="sum_documentos" placeholder="Ej: Fotos de todos los DNI en Google Drive, escrituras originales en la caja fuerte del banco, copia de seguros en USB en casa de los abuelos" rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 6: Comunicaciones -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="6">
+    <h2 class="section-title">Comunicaciones</h2>
+    <p class="section-subtitle">Teléfonos y medios de contacto de la familia. En una emergencia, poder localizar a cada miembro es crítico.</p>
+
+    <div class="section-info">
+      Añade el teléfono de <strong>cada miembro adulto</strong> (y de adolescentes que tengan móvil propio). Es importante saber el operador porque en una emergencia unas redes pueden funcionar y otras no.
+    </div>
+
+    <div class="item-list" id="movilesList"></div>
+    <button class="btn-add" onclick="addMovil()">+ Añadir otro teléfono</button>
+
+    <div class="subsection">
+      <h3>Otros medios de comunicación</h3>
+      <p>Además de los móviles, ¿qué otros medios de comunicación tenéis disponibles?</p>
+    </div>
+    <div class="field">
+      <label>Teléfono fijo</label>
+      <span class="hint">Si tenéis fijo en casa, ponlo aquí. Los teléfonos fijos a veces funcionan cuando las redes móviles están saturadas.</span>
+      <input type="text" id="com_fijo" placeholder="Ej: 91 123 45 67. Déjalo vacío si no tenéis.">
+    </div>
+    <div class="field">
+      <label class="required">Apps de mensajería que usáis habitualmente</label>
+      <span class="hint">Marca todas las que uséis en la familia. Si hay un apagón, las apps que funcionan con datos/wifi pueden ser la única forma de comunicarse.</span>
+      <div class="toggle-group" id="appsToggle">
+        <span class="toggle-chip" data-val="WhatsApp">WhatsApp</span>
+        <span class="toggle-chip" data-val="Telegram">Telegram</span>
+        <span class="toggle-chip" data-val="Signal">Signal</span>
+        <span class="toggle-chip" data-val="iMessage">iMessage</span>
+        <span class="toggle-chip" data-val="SMS">SMS</span>
+        <span class="toggle-chip" data-val="Otro">Otro</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>¿Tenéis walkie-talkies?</label>
+      <span class="hint">Los walkie-talkies PMR no dependen de antenas de telefonía. Pueden ser muy útiles en distancias cortas (1-5km).</span>
+      <div class="bool-toggle" data-field="com_walkies">
+        <span class="toggle-chip" data-val="true">Sí</span>
+        <span class="toggle-chip" data-val="false">No</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>¿Tenéis radio de emergencia (a pilas)?</label>
+      <span class="hint">Una radio FM/AM a pilas permite recibir información oficial en caso de apagón total. No hace falta internet ni cobertura.</span>
+      <div class="bool-toggle" data-field="com_radio">
+        <span class="toggle-chip" data-val="true">Sí</span>
+        <span class="toggle-chip" data-val="false">No</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Powerbanks / baterías externas</label>
+      <span class="hint">¿Cuántas baterías portátiles tenéis y de qué capacidad? Son vitales para mantener los móviles cargados sin electricidad.</span>
+      <input type="text" id="com_powerbanks" placeholder="Ej: 1 de 20.000mAh (carga el móvil 4 veces), 1 de 5.000mAh pequeño">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 7: Entorno -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="7">
+    <h2 class="section-title">Entorno</h2>
+    <p class="section-subtitle">Tu zona, los servicios cercanos y los riesgos específicos de donde vivís. Esto permite adaptar el plan a vuestra ubicación real.</p>
+
+    <div class="field">
+      <label>Tipo de zona</label>
+      <span class="hint">¿Cómo describirías el entorno donde vivís?</span>
+      <select id="ent_zona">
+        <option value="">Seleccionar...</option>
+        <option value="centro urbano">Centro urbano (ciudad grande, alta densidad)</option>
+        <option value="periferia">Periferia / urbanización</option>
+        <option value="pueblo grande">Pueblo grande (> 5.000 hab.)</option>
+        <option value="pueblo pequeno">Pueblo pequeño (< 5.000 hab.)</option>
+        <option value="rural aislado">Rural aislado / disperso</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Riesgos naturales de tu zona</label>
+      <span class="hint">Marca todos los que puedan afectar a vuestra zona. Si no estáis seguros, preguntad a vecinos mayores o consultad el plan de emergencia de vuestro municipio.</span>
+      <div class="toggle-group" id="riesgosToggle">
+        <span class="toggle-chip" data-val="Inundaciones">Inundaciones</span>
+        <span class="toggle-chip" data-val="Terremotos">Terremotos</span>
+        <span class="toggle-chip" data-val="Incendios forestales">Incendios forestales</span>
+        <span class="toggle-chip" data-val="Nevadas intensas">Nevadas intensas</span>
+        <span class="toggle-chip" data-val="Tormentas fuertes">Tormentas fuertes</span>
+        <span class="toggle-chip" data-val="Olas de calor">Olas de calor</span>
+        <span class="toggle-chip" data-val="Sequía">Sequía</span>
+        <span class="toggle-chip" data-val="Deslizamientos de tierra">Deslizamientos</span>
+        <span class="toggle-chip" data-val="Riesgo industrial cercano">Riesgo industrial</span>
+        <span class="toggle-chip" data-val="Ninguno conocido">Ninguno conocido</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Supermercados cercanos</label>
+      <span class="hint">Los supermercados más cercanos a vuestra casa. Nombre y distancia aproximada a pie o en coche.</span>
+      <textarea id="ent_supers" placeholder="Ej: Mercadona a 300m (5 min a pie), Lidl a 1.2km (15 min a pie / 3 min en coche), Carrefour Express en el bajo del edificio" rows="2"></textarea>
+    </div>
+    <div class="field">
+      <label>Farmacias cercanas</label>
+      <span class="hint">Las farmacias más cercanas. Si sabéis cuál tiene turno de guardia frecuente, indicadlo.</span>
+      <textarea id="ent_farmacias" placeholder="Ej: Farmacia López en Calle Mayor 8 (200m), Farmacia de guardia más cercana: Farmacia Centro en Plaza España" rows="2"></textarea>
+    </div>
+
+    <div class="subsection">
+      <h3>Hospital más cercano</h3>
+      <p>¿Cuál es el hospital o centro de urgencias más cercano a vuestra casa?</p>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Nombre del hospital</label>
+        <input type="text" id="ent_hospital_nombre" placeholder="Ej: Hospital Gregorio Marañón">
+      </div>
+      <div class="field">
+        <label>Distancia / tiempo</label>
+        <span class="hint">A pie y/o en coche.</span>
+        <input type="text" id="ent_hospital_distancia" placeholder="Ej: 3km, 8 min en coche / 35 min a pie">
+      </div>
+    </div>
+    <div class="field">
+      <label>Vecinos de confianza</label>
+      <span class="hint">¿Hay vecinos con los que tengáis buena relación y que podrían ayudaros (o vosotros a ellos) en una emergencia? Indica quiénes son, dónde viven y qué pueden aportar.</span>
+      <textarea id="ent_vecinos" placeholder="Ej: Paco (2ºB) — es electricista jubilado, tiene herramientas y generador. Marta (1ºA) — enfermera en activo, tiene botiquín completo. Los del 4ºD — familia joven, buena relación, podrían ayudar con transporte." rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 8: Preferencias y mascotas -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="8">
+    <h2 class="section-title">Preferencias y mascotas</h2>
+    <p class="section-subtitle">Información adicional que os permite personalizar el plan: vuestras preocupaciones, peticiones especiales y las mascotas que hay que tener en cuenta.</p>
+
+    <div class="field">
+      <label>¿Qué escenario de emergencia os preocupa más?</label>
+      <span class="hint">Pensad en qué situación os sentiríais más vulnerables. Esto ayuda a priorizar los protocolos de vuestro dossier. Podéis poner más de uno.</span>
+      <textarea id="pref_escenario" placeholder="Ej: Un apagón prolongado en invierno (tenemos calefacción eléctrica), o una DANA como la de Valencia porque vivimos cerca del río." rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Peticiones específicas para el plan</label>
+      <span class="hint">¿Hay algo especial que queráis que se tenga en cuenta? Fobias, necesidades emocionales, situaciones familiares particulares, personas que no se llevan bien...</span>
+      <textarea id="pref_peticiones" placeholder="Ej: Mi madre tiene claustrofobia severa — no podrá refugiarse en espacios cerrados pequeños. Mi hijo de 6 años tiene terrores nocturnos y necesita una rutina estricta." rows="3"></textarea>
+    </div>
+
+    <div class="subsection">
+      <h3>Mascotas</h3>
+      <p>Las mascotas son miembros de la familia y hay que incluirlas en el plan. Necesitan comida, transporte y cuidados especiales en una evacuación. Añade todas las que tengáis.</p>
+    </div>
+    <div class="item-list" id="mascotasList"></div>
+    <button class="btn-add" onclick="addMascota()">+ Añadir mascota</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 9: Módulo Bebé -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section module-section" data-step="9" data-module="bebe">
+    <h2 class="section-title">Módulo: Bebés / Niños pequeños (0-5)</h2>
+    <p class="section-subtitle">Los bebés y niños pequeños tienen necesidades muy específicas en una emergencia. Rellena estos datos para que el plan tenga en cuenta todo lo necesario.</p>
+
+    <div class="section-info">
+      Si tenéis más de un bebé/niño pequeño, indica la información de cada uno donde sea relevante. Por ejemplo: "Lucas (2 años): fórmula Nidina 2. Sofía (4 años): come de todo."
+    </div>
+
+    <div class="field">
+      <label>Tipo de alimentación</label>
+      <span class="hint">¿Cómo se alimenta el bebé/niño? Esto es crítico porque en una emergencia hay que garantizar su alimentación.</span>
+      <select id="bebe_alimentacion_tipo">
+        <option value="">Seleccionar...</option>
+        <option value="Lactancia materna exclusiva">Lactancia materna exclusiva</option>
+        <option value="Fórmula">Fórmula (biberón)</option>
+        <option value="Mixta">Mixta (materna + fórmula)</option>
+        <option value="Sólidos + leche">Sólidos + leche (> 1 año)</option>
+        <option value="Come de todo">Come de todo (> 2-3 años)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Alimentos específicos necesarios</label>
+      <span class="hint">Marcas y tipos exactos de fórmula, cereales, potitos o alimentos especiales. En una emergencia, un sustituto inadecuado puede causar problemas digestivos o alergias.</span>
+      <textarea id="bebe_alimentos" placeholder="Ej: Fórmula Nidina 2 Premium (no tolera Almirón). Cereales sin gluten marca Nestlé. Potitos de frutas Hero Baby." rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Pañales</label>
+      <span class="hint">Talla actual, marca habitual y cuántos pañales de reserva tenéis en casa ahora mismo.</span>
+      <input type="text" id="bebe_panales" placeholder="Ej: Talla 4, usamos Dodot Activity. Tenemos ~40 pañales de reserva.">
+    </div>
+    <div class="field">
+      <label>Portabebés</label>
+      <span class="hint">¿Tenéis mochila portabebés, fular, mei tai...? En una evacuación a pie, llevar al bebé en brazos no es viable. Indica el tipo y hasta qué peso sirve.</span>
+      <input type="text" id="bebe_portabebes" placeholder="Ej: Mochila ergonómica Ergobaby (hasta 20kg), fular elástico Boba Wrap">
+    </div>
+    <div class="field">
+      <label>Silla de coche</label>
+      <span class="hint">¿Qué grupo de silla tiene y en qué vehículo está instalada? Si tenéis más de una, indicadlo.</span>
+      <input type="text" id="bebe_silla" placeholder="Ej: Silla grupo 1 (9-18kg) en el Seat León. Base isofix grupo 0+ en el Opel Corsa.">
+    </div>
+
+    <div class="subsection">
+      <h3>Guardería o escuela infantil</h3>
+      <p>Si el niño va a guardería, necesitamos los datos para poder recogerlo en caso de emergencia durante horario escolar.</p>
+    </div>
+    <div class="field">
+      <label>Nombre de la guardería</label>
+      <input type="text" id="bebe_guarderia_nombre" placeholder="Ej: Escuela Infantil Los Pitufos">
+    </div>
+    <div class="field">
+      <label>Dirección</label>
+      <input type="text" id="bebe_guarderia_dir" placeholder="Ej: Calle del Prado 12, 28014 Madrid">
+    </div>
+    <div class="field">
+      <label>Teléfono</label>
+      <input type="text" id="bebe_guarderia_tel" placeholder="Ej: 91 234 56 78">
+    </div>
+
+    <div class="subsection">
+      <h3>Cuidadores alternativos</h3>
+      <p>Personas de confianza que podrían hacerse cargo del bebé/niño si los padres no están disponibles (hospitalizados, atrapados, etc.). Necesitamos al menos 2 personas.</p>
+    </div>
+    <div class="item-list" id="cuidadoresList"></div>
+    <button class="btn-add" onclick="addCuidador()">+ Añadir cuidador alternativo</button>
+
+    <div class="subsection">
+      <h3>Salud infantil</h3>
+      <p>Medicación habitual y datos del pediatra.</p>
+    </div>
+    <div class="field">
+      <label>Medicación infantil que tenéis en casa</label>
+      <span class="hint">Medicamentos habituales del bebé/niño que debéis tener siempre disponibles. Incluid el formato y la dosis.</span>
+      <textarea id="bebe_medicacion" placeholder="Ej: Apiretal 100mg/ml (1ml por cada kg de peso), Dalsy 20mg/ml, Suero oral Bioralsuero, Estilsona gotas (para las crisis de bronquitis)" rows="3"></textarea>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Nombre del pediatra</label>
+        <input type="text" id="bebe_pediatra_nombre" placeholder="Ej: Dra. García Martín">
+      </div>
+      <div class="field">
+        <label>Teléfono del pediatra</label>
+        <input type="text" id="bebe_pediatra_tel" placeholder="Ej: 91 345 67 89">
+      </div>
+    </div>
+    <div class="field">
+      <label>Rutina de sueño</label>
+      <span class="hint">Información detallada para que un cuidador alternativo pueda acostar al niño. Hora, rituales, objetos imprescindibles (peluche, chupete, luz...).</span>
+      <textarea id="bebe_rutina" placeholder="Ej: Se duerme a las 20:30. Necesita su peluche azul (conejo) y luz tenue encendida. Le cantamos una nana. Se despierta 1 vez sobre las 3:00, necesita que le pongan el chupete." rows="4"></textarea>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 10: Módulo Mayores -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section module-section" data-step="10" data-module="mayores">
+    <h2 class="section-title">Módulo: Personas mayores / dependientes</h2>
+    <p class="section-subtitle">Las personas mayores o con dependencia necesitan un plan especialmente detallado. Una evacuación, un corte de luz o la falta de medicación pueden ser situaciones de riesgo vital.</p>
+
+    <div class="section-info">
+      Si en el hogar hay más de una persona mayor con necesidades especiales, especifica a quién corresponde cada dato. Por ejemplo: "Abuelo Antonio: andador. Abuela Carmen: autónoma."
+    </div>
+
+    <div class="field">
+      <label>Nivel de movilidad</label>
+      <span class="hint">¿Cómo se desplaza la persona en el día a día? Esto determina cómo planificar una evacuación.</span>
+      <select id="may_movilidad">
+        <option value="">Seleccionar...</option>
+        <option value="Autónomo">Autónomo — se desplaza sin ayuda, sube escaleras</option>
+        <option value="Autónomo con limitaciones">Autónomo con limitaciones — camina pero se cansa rápido, escaleras con dificultad</option>
+        <option value="Bastón">Usa bastón — puede caminar distancias cortas</option>
+        <option value="Andador">Usa andador — movilidad limitada</option>
+        <option value="Silla de ruedas">Silla de ruedas — necesita ayuda para desplazarse</option>
+        <option value="Encamado">Encamado — no puede moverse de la cama</option>
+      </select>
+    </div>
+
+    <div class="subsection">
+      <h3>Medicación detallada</h3>
+      <p>Lista <strong>todos los medicamentos</strong> que toma la persona mayor. Esto es vital: en una emergencia, la medicación puede ser inaccesible y hay que priorizar las esenciales. Añade cada medicamento por separado.</p>
+    </div>
+    <div class="item-list" id="medicacionList"></div>
+    <button class="btn-add" onclick="addMedicacion()">+ Añadir medicamento</button>
+
+    <div class="subsection">
+      <h3>Aparatos médicos eléctricos</h3>
+      <p>¿La persona usa algún aparato que necesite electricidad? Un corte de luz prolongado puede ser peligroso. Indica cada aparato, cuánto dura su batería y si existe alternativa sin electricidad.</p>
+    </div>
+    <div class="item-list" id="aparatosList"></div>
+    <button class="btn-add" onclick="addAparato()">+ Añadir aparato médico</button>
+
+    <div class="subsection">
+      <h3>Estado cognitivo y evacuación</h3>
+      <p>Información sobre la capacidad mental y física de la persona para actuar en una emergencia.</p>
+    </div>
+    <div class="field">
+      <label>Deterioro cognitivo</label>
+      <span class="hint">¿La persona tiene algún tipo de deterioro cognitivo? Esto afecta a su capacidad de seguir instrucciones y tomar decisiones en una emergencia.</span>
+      <select id="may_cognitivo">
+        <option value="">Seleccionar...</option>
+        <option value="Ninguno">Ninguno — mente clara, toma decisiones</option>
+        <option value="Leve">Leve — olvidos frecuentes, pero se orienta y entiende instrucciones</option>
+        <option value="Moderado">Moderado — necesita supervisión, puede confundirse en situaciones nuevas</option>
+        <option value="Alzheimer">Alzheimer — desorientación frecuente, no puede quedarse solo</option>
+        <option value="Demencia avanzada">Demencia avanzada — no reconoce personas, necesita cuidado constante</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Capacidad de evacuación</label>
+      <span class="hint">Describe con detalle qué puede hacer la persona en caso de tener que salir de casa rápidamente. ¿Cuánto puede caminar? ¿Necesita ayuda con escaleras? ¿Cuántas personas hacen falta para moverla?</span>
+      <textarea id="may_evacuacion" placeholder="Ej: Puede caminar 200m despacio con andador en terreno llano. No puede bajar escaleras sola (vivimos en un 3º sin ascensor, necesita 2 personas para ayudarla). Se fatiga mucho con el calor." rows="4"></textarea>
+    </div>
+    <div class="field">
+      <label>Cuidador principal</label>
+      <span class="hint">Nombre de la persona que se encarga habitualmente de sus cuidados. Si hay más de uno, indica todos.</span>
+      <input type="text" id="may_cuidador" placeholder="Ej: María (hija, convive con ella) y auxiliar del SAD los lunes y miércoles">
+    </div>
+
+    <div class="subsection">
+      <h3>Centro de salud habitual</h3>
+      <p>¿A qué centro de salud o ambulatorio acude la persona? En una emergencia, puede ser necesario contactar con su médico de cabecera.</p>
+    </div>
+    <div class="field">
+      <label>Nombre del centro de salud</label>
+      <input type="text" id="may_centro_nombre" placeholder="Ej: Centro de Salud Retiro">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="text" id="may_centro_tel" placeholder="Ej: 91 456 78 90">
+      </div>
+      <div class="field">
+        <label>Dirección</label>
+        <input type="text" id="may_centro_dir" placeholder="Ej: Calle de Narváez 15">
+      </div>
+    </div>
+    <div class="field">
+      <label>Grado de dependencia reconocido</label>
+      <span class="hint">¿Tiene reconocido algún grado de dependencia por la administración? ¿Está en trámite? Si no lo ha solicitado, indica "No solicitado".</span>
+      <input type="text" id="may_dependencia" placeholder="Ej: Grado II reconocido, recibe SAD 3h/semana. / En trámite desde enero. / No solicitado.">
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 11: Módulo Jóvenes -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section module-section" data-step="11" data-module="jovenes">
+    <h2 class="section-title">Módulo: Adolescentes (12-17 años)</h2>
+    <p class="section-subtitle">Los adolescentes pueden ser un recurso muy valioso en una emergencia. Tienen capacidad de actuar de forma autónoma y pueden asumir responsabilidades. Necesitamos saber qué pueden hacer.</p>
+
+    <div class="section-info">
+      Si hay más de un adolescente en casa, especifica a quién corresponde cada dato. Por ejemplo: "Pablo (15): va solo al instituto. Lucía (13): solo se queda sola en casa si sabemos dónde está."
+    </div>
+
+    <div class="field">
+      <label>Nivel de autonomía</label>
+      <span class="hint">¿Hasta qué punto el/la adolescente se maneja solo/a? Esto define qué responsabilidades puede asumir en una emergencia.</span>
+      <select id="jov_autonomia">
+        <option value="">Seleccionar...</option>
+        <option value="Puede estar solo en casa">Puede estar solo en casa unas horas</option>
+        <option value="Se desplaza solo por el barrio">Se desplaza solo por el barrio / pueblo</option>
+        <option value="Se mueve solo por la ciudad">Se mueve solo por la ciudad (transporte público)</option>
+        <option value="Totalmente autónomo">Totalmente autónomo (viaja solo, gestiona situaciones)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>¿Tiene teléfono móvil propio?</label>
+      <span class="hint">Si tiene móvil, ya debería estar añadido en la sección de Comunicaciones con su número.</span>
+      <div class="bool-toggle" data-field="jov_movil">
+        <span class="toggle-chip" data-val="true">Sí</span>
+        <span class="toggle-chip" data-val="false">No</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Conocimientos útiles del adolescente</label>
+      <span class="hint">¿Tiene alguna formación o habilidad que pueda ser útil? Scout, primeros auxilios, orientación con brújula/mapa, mecánica básica, informática, radioafición, natación avanzada... Separa con comas.</span>
+      <textarea id="jov_conocimientos" placeholder="Ej: Es scout desde los 10 años (sabe orientarse, hacer fuego, nudos). Hizo un curso de primeros auxilios en el instituto. Nada muy bien." rows="3"></textarea>
+    </div>
+    <div class="field">
+      <label>Horarios habituales fuera de casa</label>
+      <span class="hint">¿Cuándo está fuera de casa normalmente? Horario del instituto, actividades extraescolares, entrenamientos... Esto permite saber dónde buscarle en caso de emergencia.</span>
+      <textarea id="jov_horarios" placeholder="Ej: Instituto L-V de 8:00 a 14:30 (IES Cervantes). Fútbol M y J de 17:00 a 18:30 (polideportivo municipal). Viernes tarde suele estar con amigos en el parque del barrio." rows="4"></textarea>
+    </div>
+    <div class="field">
+      <label>¿Tiene carnet de conducir?</label>
+      <span class="hint">Carnet de ciclomotor (AM, desde 15 años) o coche (B, desde 18 años).</span>
+      <div class="bool-toggle" data-field="jov_carnet">
+        <span class="toggle-chip" data-val="true">Sí (moto o coche)</span>
+        <span class="toggle-chip" data-val="false">No</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Rol que puede asumir en una emergencia</label>
+      <span class="hint">¿Qué podría hacer el/la adolescente si hay una emergencia? Ejemplos: servir de mensajero entre núcleos familiares, cuidar a hermanos pequeños, ayudar a un abuelo, cargar peso, montar en bici a buscar ayuda...</span>
+      <textarea id="jov_rol" placeholder="Ej: Podría ir en bici al pueblo del abuelo (5km) como mensajero. Sabe cuidar a su hermano de 3 años. Es fuerte y puede ayudar a cargar cosas o mover a la abuela." rows="4"></textarea>
+    </div>
+
+    <div class="subsection">
+      <h3>Centro de estudios</h3>
+      <p>Datos del instituto o colegio donde estudia. Necesarios para poder recogerlo en caso de emergencia durante el horario escolar.</p>
+    </div>
+    <div class="field">
+      <label>Nombre del centro</label>
+      <input type="text" id="jov_centro_nombre" placeholder="Ej: IES Cervantes">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Dirección</label>
+        <input type="text" id="jov_centro_dir" placeholder="Ej: Calle de la Escuela 5, 28001">
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <input type="text" id="jov_centro_tel" placeholder="Ej: 91 567 89 01">
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- STEP 12: Revisión y envío -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="form-section" data-step="12">
+    <h2 class="section-title">Revisión y descarga</h2>
+    <p class="section-subtitle">Comprueba que los datos principales están bien. Puedes volver a cualquier paso pulsando en la barra de progreso de arriba.</p>
+
+    <div id="reviewSummary" style="margin-bottom: 24px;"></div>
+
+    <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 18px; margin-bottom: 20px;">
+      <p style="font-size: 0.95rem; color: #15803d; line-height: 1.7;">
+        Cuando pulses <strong>"Enviar al coordinador"</strong>, tus datos llegarán directamente al coordinador del plan familiar. No tenéis que hacer nada más.
+      </p>
+    </div>
+
+    <div id="submitError" style="display:none; background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 10px; padding: 14px 18px; margin-bottom: 16px;">
+      <p style="font-size: 0.9rem; color: var(--danger); line-height: 1.5;" id="submitErrorMsg"></p>
+    </div>
+  </div>
+
+  <!-- Success screen -->
+  <div class="form-section" data-step="success" style="display: none;">
+    <div class="success-screen">
+      <div class="icon">&#10003;</div>
+      <h2>Cuestionario enviado</h2>
+      <p>El coordinador ya tiene vuestros datos. No tenéis que hacer nada más.</p>
+      <p style="color: var(--text-light); font-size: 0.88rem; margin-top: 4px;">Si necesitáis corregir algo, podéis volver a rellenar el formulario y enviarlo de nuevo — se actualizarán los datos automáticamente.</p>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
+        <button class="btn btn-primary" onclick="location.reload()">Rellenar otro cuestionario</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons" id="navButtons">
+    <button class="btn btn-secondary" id="btnPrev" onclick="prevStep()">Anterior</button>
+    <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Siguiente</button>
+  </div>
+</div>
+
+<script>
+// ─── State ───
+let currentStep = 0;
+const boolValues = {};
+const activeModules = new Set();
+const BASE_STEPS = [
+  'Identificación', 'Miembros', 'Vivienda', 'Transporte',
+  'Recursos', 'Suministros', 'Comunicaciones', 'Entorno', 'Preferencias'
+];
+const MODULE_STEPS = {
+  bebe: { label: 'Bebés', step: 9 },
+  mayores: { label: 'Mayores', step: 10 },
+  jovenes: { label: 'Jóvenes', step: 11 },
+};
+const REVIEW_STEP = 12;
+
+function getVisibleSteps() {
+  const steps = [];
+  for (let i = 0; i <= 8; i++) steps.push(i);
+  for (const mod of ['bebe', 'mayores', 'jovenes']) {
+    if (activeModules.has(mod)) steps.push(MODULE_STEPS[mod].step);
+  }
+  steps.push(REVIEW_STEP);
+  return steps;
+}
+
+function getStepLabels() {
+  const labels = [...BASE_STEPS];
+  for (const mod of ['bebe', 'mayores', 'jovenes']) {
+    if (activeModules.has(mod)) labels.push(MODULE_STEPS[mod].label);
+  }
+  labels.push('Enviar');
+  return labels;
+}
+
+// ─── Navigation ───
+function updateUI() {
+  const visible = getVisibleSteps();
+  const labels = getStepLabels();
+  const idx = visible.indexOf(currentStep);
+
+  const bar = document.getElementById('progressBar');
+  const labelsEl = document.getElementById('progressLabels');
+  bar.innerHTML = '';
+  labelsEl.innerHTML = '';
+  visible.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'progress-step' + (i < idx ? ' completed' : '') + (i === idx ? ' active' : '');
+    dot.onclick = () => goToStep(s);
+    bar.appendChild(dot);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'progress-label' + (i === idx ? ' active' : '');
+    lbl.textContent = labels[i];
+    lbl.onclick = () => goToStep(s);
+    labelsEl.appendChild(lbl);
+  });
+
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  const activeSection = document.querySelector(`.form-section[data-step="${currentStep}"]`);
+  if (activeSection) activeSection.classList.add('active');
+
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  const nav = document.getElementById('navButtons');
+
+  if (currentStep === 'success') {
+    nav.style.display = 'none';
+    return;
+  }
+  nav.style.display = 'flex';
+  btnPrev.style.visibility = idx === 0 ? 'hidden' : 'visible';
+
+  if (idx === visible.length - 1) {
+    btnNext.textContent = 'Enviar al coordinador';
+    btnNext.className = 'btn btn-success';
+    btnNext.onclick = submitForm;
+  } else {
+    btnNext.textContent = 'Siguiente';
+    btnNext.className = 'btn btn-primary';
+    btnNext.onclick = nextStep;
+  }
+
+  if (currentStep === REVIEW_STEP) buildReview();
+}
+
+function goToStep(step) {
+  currentStep = step;
+  updateUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function nextStep() {
+  const visible = getVisibleSteps();
+  const idx = visible.indexOf(currentStep);
+  if (idx < visible.length - 1) {
+    currentStep = visible[idx + 1];
+    updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function prevStep() {
+  const visible = getVisibleSteps();
+  const idx = visible.indexOf(currentStep);
+  if (idx > 0) {
+    currentStep = visible[idx - 1];
+    updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ─── Module toggles ───
+document.querySelectorAll('.module-toggle').forEach(el => {
+  el.addEventListener('click', () => {
+    const mod = el.dataset.module;
+    el.classList.toggle('active');
+    if (activeModules.has(mod)) activeModules.delete(mod);
+    else activeModules.add(mod);
+    updateUI();
+  });
+});
+
+// ─── Bool toggles ───
+document.querySelectorAll('.bool-toggle').forEach(group => {
+  const field = group.dataset.field;
+  group.querySelectorAll('.toggle-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      group.querySelectorAll('.toggle-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      boolValues[field] = chip.dataset.val === 'true';
+    });
+  });
+});
+
+// ─── Multi-select toggle chips ───
+document.querySelectorAll('.toggle-group .toggle-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+// ─── Repeatable: Miembros ───
+let miembroCount = 0;
+function addMiembro() {
+  miembroCount++;
+  const n = miembroCount;
+  const html = `
+    <div class="item-card" id="miembro_${n}">
+      <div class="item-header">
+        <h4>Miembro ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('miembro_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="required">Nombre completo</label>
+          <span class="hint">Nombre y apellidos tal como aparecen en el DNI.</span>
+          <input type="text" id="m${n}_nombre">
+        </div>
+        <div class="field">
+          <label class="required">Parentesco</label>
+          <span class="hint">Relación con el titular del núcleo.</span>
+          <select id="m${n}_parentesco">
+            <option value="">Seleccionar...</option>
+            <option value="titular">Titular</option>
+            <option value="cónyuge">Cónyuge / Pareja</option>
+            <option value="hijo">Hijo/a</option>
+            <option value="padre">Padre / Madre</option>
+            <option value="abuelo">Abuelo/a</option>
+            <option value="hermano">Hermano/a</option>
+            <option value="sobrino">Sobrino/a</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label class="required">Edad</label>
+          <span class="hint">Años cumplidos.</span>
+          <input type="number" id="m${n}_edad" min="0">
+        </div>
+        <div class="field">
+          <label>DNI / NIE</label>
+          <span class="hint">Número de documento de identidad.</span>
+          <input type="text" id="m${n}_dni">
+        </div>
+        <div class="field">
+          <label>Grupo sanguíneo</label>
+          <span class="hint">Si no lo sabéis, averiguadlo en vuestro centro de salud.</span>
+          <select id="m${n}_sangre">
+            <option value="">No lo sé</option>
+            <option value="A+">A+</option><option value="A-">A-</option>
+            <option value="B+">B+</option><option value="B-">B-</option>
+            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+            <option value="O+">O+</option><option value="O-">O-</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Teléfono móvil</label>
+        <span class="hint">Si esta persona tiene teléfono propio. Los niños pequeños no tendrán.</span>
+        <input type="tel" id="m${n}_telefono" placeholder="Ej: 612 345 678">
+      </div>
+      <div class="field">
+        <label>Alergias</label>
+        <span class="hint">Alergias a medicamentos, alimentos, picaduras de insectos, látex... Indica la gravedad si es conocida (ej: "anafilaxia a cacahuetes").</span>
+        <textarea id="m${n}_alergias" placeholder="Ej: Alergia grave a penicilina (anafilaxia), intolerante a la lactosa, alergia leve al polen" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <label>Medicación fija</label>
+        <span class="hint">Medicamentos que toma todos los días. Incluye nombre, dosis y frecuencia de cada uno. Sepáralos con punto y coma si hay varios.</span>
+        <textarea id="m${n}_medicacion" placeholder="Ej: Enalapril 10mg (1 al día por la mañana); Omeprazol 20mg (1 al día en ayunas); Lorazepam 1mg (medio comprimido antes de dormir)" rows="3"></textarea>
+      </div>
+      <div class="field">
+        <label>Condiciones médicas</label>
+        <span class="hint">Enfermedades crónicas, discapacidades, prótesis, embarazo, operaciones recientes... Todo lo que un médico o rescatador debería saber.</span>
+        <textarea id="m${n}_condiciones" placeholder="Ej: Diabetes tipo 2, hipertensión arterial, prótesis de cadera derecha (2022), miopía severa (depende de gafas/lentillas)" rows="3"></textarea>
+      </div>
+    </div>`;
+  document.getElementById('miembrosList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Vehículos ───
+let vehiculoCount = 0;
+function addVehiculo() {
+  vehiculoCount++;
+  const n = vehiculoCount;
+  const html = `
+    <div class="item-card" id="vehiculo_${n}">
+      <div class="item-header">
+        <h4>Vehículo ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('vehiculo_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Tipo de vehículo</label>
+          <select id="v${n}_tipo">
+            <option value="coche">Coche</option>
+            <option value="SUV/todoterreno">SUV / Todoterreno</option>
+            <option value="furgoneta">Furgoneta</option>
+            <option value="moto">Moto</option>
+            <option value="ciclomotor">Ciclomotor</option>
+            <option value="autocaravana">Autocaravana</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Marca y modelo</label>
+          <span class="hint">Para identificarlo rápidamente.</span>
+          <input type="text" id="v${n}_modelo" placeholder="Ej: Seat León 2019">
+        </div>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>Plazas</label>
+          <span class="hint">Total de asientos.</span>
+          <input type="number" id="v${n}_plazas" min="1" value="5">
+        </div>
+        <div class="field">
+          <label>¿Dónde lo aparcáis?</label>
+          <span class="hint">Para localizarlo rápido.</span>
+          <input type="text" id="v${n}_ubicacion" placeholder="Ej: Garaje -1, plaza 45">
+        </div>
+        <div class="field">
+          <label>¿Es 4x4?</label>
+          <span class="hint">Puede circular por caminos sin asfaltar.</span>
+          <select id="v${n}_4x4"><option value="false">No</option><option value="true">Sí</option></select>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('vehiculosList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Móviles ───
+let movilCount = 0;
+function addMovil() {
+  movilCount++;
+  const n = movilCount;
+  const html = `
+    <div class="item-card" id="movil_${n}">
+      <div class="item-header">
+        <h4>Teléfono móvil ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('movil_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field">
+        <label class="required">¿De quién es este teléfono?</label>
+        <span class="hint">Nombre de la persona a la que pertenece el móvil.</span>
+        <input type="text" id="tel${n}_nombre" placeholder="Ej: Carlos">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="required">Número</label>
+          <span class="hint">Con prefijo si es necesario.</span>
+          <input type="tel" id="tel${n}_numero" placeholder="Ej: 612 345 678">
+        </div>
+        <div class="field">
+          <label>Operador</label>
+          <span class="hint">Útil porque en emergencias unas redes funcionan y otras no.</span>
+          <select id="tel${n}_operador">
+            <option value="">No sé</option>
+            <option value="Movistar">Movistar</option>
+            <option value="Vodafone">Vodafone</option>
+            <option value="Orange">Orange</option>
+            <option value="Yoigo">Yoigo</option>
+            <option value="MásMóvil">MásMóvil</option>
+            <option value="Digi">Digi</option>
+            <option value="Simyo">Simyo</option>
+            <option value="Pepephone">Pepephone</option>
+            <option value="Lowi">Lowi</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('movilesList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Mascotas ───
+let mascotaCount = 0;
+function addMascota() {
+  mascotaCount++;
+  const n = mascotaCount;
+  const html = `
+    <div class="item-card" id="mascota_${n}">
+      <div class="item-header">
+        <h4>Mascota ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('mascota_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field-row-3">
+        <div class="field">
+          <label>Tipo de animal</label>
+          <select id="pet${n}_tipo">
+            <option value="perro">Perro</option>
+            <option value="gato">Gato</option>
+            <option value="pájaro">Pájaro</option>
+            <option value="conejo">Conejo</option>
+            <option value="pez">Peces</option>
+            <option value="reptil">Reptil</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Nombre y raza</label>
+          <input type="text" id="pet${n}_nombre" placeholder="Ej: Luna, labrador">
+        </div>
+        <div class="field">
+          <label>Peso aprox.</label>
+          <span class="hint">Importante para transporte.</span>
+          <input type="text" id="pet${n}_peso" placeholder="Ej: 25kg">
+        </div>
+      </div>
+      <div class="field">
+        <label>Necesidades especiales</label>
+        <span class="hint">Medicación, dieta especial, miedo a ruidos fuertes, agresividad con desconocidos, transportín necesario...</span>
+        <textarea id="pet${n}_necesidades" placeholder="Ej: Toma medicación para el corazón (Vetmedin), necesita transportín rígido para el coche, tiene miedo a los petardos y tormentas (se esconde y tiembla)" rows="3"></textarea>
+      </div>
+    </div>`;
+  document.getElementById('mascotasList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Propiedades ───
+let propiedadCount = 0;
+function addPropiedad() {
+  propiedadCount++;
+  const n = propiedadCount;
+  const html = `
+    <div class="item-card" id="propiedad_${n}">
+      <div class="item-header">
+        <h4>Propiedad ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('propiedad_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field">
+        <label>Tipo de propiedad</label>
+        <span class="hint">¿Qué tipo de propiedad es?</span>
+        <input type="text" id="prop${n}_tipo" placeholder="Ej: Casa de pueblo, finca rústica, apartamento en la playa">
+      </div>
+      <div class="field">
+        <label>Ubicación</label>
+        <span class="hint">¿Dónde está? Pueblo, distancia aproximada desde vuestra casa principal.</span>
+        <input type="text" id="prop${n}_ubicacion" placeholder="Ej: Aldeanueva de la Vera (Cáceres), a 2h 30min en coche">
+      </div>
+      <div class="field">
+        <label>Descripción y recursos</label>
+        <span class="hint">Describe la propiedad: habitaciones, agua (pozo, red), calefacción (leña, gasoil), huerto, garaje, accesos...</span>
+        <textarea id="prop${n}_descripcion" placeholder="Ej: Casa de 3 habitaciones, pozo propio, chimenea de leña, huerto vallado de 200m², garaje para 1 coche, acceso por carretera de montaña" rows="3"></textarea>
+      </div>
+    </div>`;
+  document.getElementById('propiedadesList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Cuidadores (bebé) ───
+let cuidadorCount = 0;
+function addCuidador() {
+  cuidadorCount++;
+  const n = cuidadorCount;
+  const html = `
+    <div class="item-card" id="cuidador_${n}">
+      <div class="item-header">
+        <h4>Cuidador alternativo ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('cuidador_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field">
+        <label>Nombre completo</label>
+        <span class="hint">Persona de confianza que podría hacerse cargo del niño.</span>
+        <input type="text" id="cuid${n}_nombre" placeholder="Ej: Carmen García (abuela materna)">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="tel" id="cuid${n}_tel" placeholder="Ej: 634 567 890">
+        </div>
+        <div class="field">
+          <label>Relación con el niño</label>
+          <span class="hint">Parentesco o relación.</span>
+          <input type="text" id="cuid${n}_relacion" placeholder="Ej: Abuela materna, tía, vecina de confianza">
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('cuidadoresList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Medicación (mayores) ───
+let medicacionCount = 0;
+function addMedicacion() {
+  medicacionCount++;
+  const n = medicacionCount;
+  const html = `
+    <div class="item-card" id="medicacion_${n}">
+      <div class="item-header">
+        <h4>Medicamento ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('medicacion_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre del medicamento</label>
+          <span class="hint">Nombre comercial o principio activo.</span>
+          <input type="text" id="med${n}_nombre" placeholder="Ej: Enalapril / Sintrom / Metformina">
+        </div>
+        <div class="field">
+          <label>Dosis</label>
+          <span class="hint">Cantidad por toma.</span>
+          <input type="text" id="med${n}_dosis" placeholder="Ej: 10mg / 1 comprimido / 0.5ml">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Frecuencia</label>
+          <span class="hint">¿Cuántas veces y cuándo?</span>
+          <input type="text" id="med${n}_frecuencia" placeholder="Ej: 1 vez al día por la mañana / Cada 8 horas">
+        </div>
+        <div class="field">
+          <label>¿Es esencial para la vida?</label>
+          <span class="hint">¿Hay riesgo vital si se queda sin este medicamento más de 48-72h?</span>
+          <select id="med${n}_esencial">
+            <option value="false">No — se puede estar unos días sin él</option>
+            <option value="true">Sí — riesgo vital sin él</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('medicacionList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Repeatable: Aparatos médicos (mayores) ───
+let aparatoCount = 0;
+function addAparato() {
+  aparatoCount++;
+  const n = aparatoCount;
+  const html = `
+    <div class="item-card" id="aparato_${n}">
+      <div class="item-header">
+        <h4>Aparato médico ${n}</h4>
+        <button class="btn-remove" onclick="document.getElementById('aparato_${n}').remove()">Eliminar</button>
+      </div>
+      <div class="field">
+        <label>Nombre del aparato</label>
+        <span class="hint">CPAP, concentrador de oxígeno, nebulizador, bomba de insulina, oxímetro, tensiómetro eléctrico...</span>
+        <input type="text" id="ap${n}_nombre" placeholder="Ej: CPAP ResMed AirSense 10">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Autonomía de batería</label>
+          <span class="hint">¿Cuánto dura sin enchufar? Si no tiene batería, indica "Sin batería, solo red eléctrica".</span>
+          <input type="text" id="ap${n}_bateria" placeholder="Ej: 8 horas con batería externa / Sin batería">
+        </div>
+        <div class="field">
+          <label>Alternativa sin electricidad</label>
+          <span class="hint">¿Existe una alternativa manual o sin corriente? ¿Qué pasa si no hay luz?</span>
+          <input type="text" id="ap${n}_alt" placeholder="Ej: Dormir semiincorporado sin CPAP / No hay alternativa">
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('aparatosList').insertAdjacentHTML('beforeend', html);
+}
+
+// ─── Helpers ───
+function val(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+function valNum(id) { const v = val(id); return v === '' ? 0 : Number(v); }
+function valNumOrNull(id) { const v = val(id); return v === '' ? null : Number(v); }
+function valBool(field) { return boolValues[field] ?? null; }
+function getSelectedChips(groupId) {
+  return Array.from(document.querySelectorAll(`#${groupId} .toggle-chip.selected`)).map(c => c.dataset.val);
+}
+function splitCSV(str) {
+  return str ? str.split(',').map(s => s.trim()).filter(Boolean) : [];
+}
+
+// ─── Collect repeatables ───
+function collectItems(containerId, fieldExtractor) {
+  const items = [];
+  document.querySelectorAll(`#${containerId} .item-card`).forEach(card => {
+    const id = card.id.split('_')[1];
+    const item = fieldExtractor(id);
+    if (item) items.push(item);
+  });
+  return items;
+}
+
+function collectMiembros() {
+  return collectItems('miembrosList', id => {
+    const nombre = val(`m${id}_nombre`);
+    if (!nombre) return null;
+    return {
+      nombre,
+      edad: valNum(`m${id}_edad`),
+      parentesco: val(`m${id}_parentesco`),
+      dni: val(`m${id}_dni`) || undefined,
+      grupoSanguineo: val(`m${id}_sangre`) || undefined,
+      telefono: val(`m${id}_telefono`) || undefined,
+      alergias: val(`m${id}_alergias`) || undefined,
+      medicacionFija: val(`m${id}_medicacion`) || undefined,
+      condicionesMedicas: val(`m${id}_condiciones`) || undefined,
+    };
+  });
+}
+
+function collectVehiculos() {
+  return collectItems('vehiculosList', id => ({
+    tipo: val(`v${id}_tipo`),
+    modelo: val(`v${id}_modelo`) || undefined,
+    plazas: valNum(`v${id}_plazas`),
+    ubicacion: val(`v${id}_ubicacion`) || undefined,
+    todoterreno: val(`v${id}_4x4`) === 'true',
+  }));
+}
+
+function collectMoviles() {
+  return collectItems('movilesList', id => {
+    const nombre = val(`tel${id}_nombre`);
+    if (!nombre) return null;
+    return { nombre, numero: val(`tel${id}_numero`), operador: val(`tel${id}_operador`) || undefined };
+  });
+}
+
+function collectMascotas() {
+  return collectItems('mascotasList', id => ({
+    tipo: val(`pet${id}_tipo`),
+    nombre: val(`pet${id}_nombre`) || undefined,
+    necesidades: val(`pet${id}_necesidades`) || undefined,
+  }));
+}
+
+function collectPropiedades() {
+  return collectItems('propiedadesList', id => {
+    const tipo = val(`prop${id}_tipo`);
+    if (!tipo) return null;
+    return {
+      tipo,
+      ubicacion: val(`prop${id}_ubicacion`) || undefined,
+      descripcion: val(`prop${id}_descripcion`) || undefined,
+    };
+  });
+}
+
+function collectCuidadores() {
+  return collectItems('cuidadoresList', id => {
+    const nombre = val(`cuid${id}_nombre`);
+    if (!nombre) return null;
+    return { nombre, telefono: val(`cuid${id}_tel`), relacion: val(`cuid${id}_relacion`) };
+  });
+}
+
+function collectMedicacion() {
+  return collectItems('medicacionList', id => {
+    const nombre = val(`med${id}_nombre`);
+    if (!nombre) return null;
+    return {
+      nombre,
+      dosis: val(`med${id}_dosis`),
+      frecuencia: val(`med${id}_frecuencia`),
+      esencial: val(`med${id}_esencial`) === 'true',
+    };
+  });
+}
+
+function collectAparatos() {
+  return collectItems('aparatosList', id => {
+    const nombre = val(`ap${id}_nombre`);
+    if (!nombre) return null;
+    return {
+      aparato: nombre,
+      autonomiaBateria: val(`ap${id}_bateria`) || undefined,
+      alternativa: val(`ap${id}_alt`) || undefined,
+    };
+  });
+}
+
+// ─── Build JSON ───
+function buildJSON() {
+  const data = {
+    nombre: val('nucleoNombre'),
+    fechaEnvio: new Date().toISOString(),
+    modulosAdicionales: Array.from(activeModules),
+    miembros: collectMiembros(),
+    vivienda: {
+      direccion: val('viv_direccion'),
+      tipo: val('viv_tipo'),
+      planta: valNumOrNull('viv_planta'),
+      ascensor: valBool('viv_ascensor'),
+      garaje: val('viv_garaje') || undefined,
+      trastero: val('viv_trastero') || undefined,
+      llavesPaso: { agua: val('viv_agua'), electricidad: val('viv_electricidad'), gas: val('viv_gas') },
+      espacioExterior: val('viv_exterior') || undefined,
+      habitacionSegura: val('viv_segura') || undefined,
+    },
+    transporte: {
+      vehiculos: collectVehiculos(),
+      conductores: splitCSV(val('trans_conductores')),
+      bicicletas: valNum('trans_bicicletas'),
+    },
+    recursos: {
+      conocimientosUtiles: splitCSV(val('rec_conocimientos')),
+      herramientas: splitCSV(val('rec_herramientas')),
+      armasCaza: val('rec_armas') || undefined,
+      huertoAnimales: val('rec_huerto') || undefined,
+      propiedadesAdicionales: collectPropiedades(),
+    },
+    suministros: {
+      comidaNoPerecedera: val('sum_comida'),
+      aguaAlmacenada: val('sum_agua'),
+      botiquin: val('sum_botiquin'),
+      iluminacion: val('sum_iluminacion'),
+      cocinaAlternativa: val('sum_cocina'),
+      copiasDocumentos: val('sum_documentos'),
+    },
+    comunicaciones: {
+      moviles: collectMoviles(),
+      telefonoFijo: val('com_fijo') || undefined,
+      apps: getSelectedChips('appsToggle'),
+      walkieTalkies: valBool('com_walkies') ?? false,
+      radioEmergencia: valBool('com_radio') ?? false,
+      powerbanks: val('com_powerbanks') || undefined,
+    },
+    entorno: {
+      zona: val('ent_zona'),
+      riesgosNaturales: getSelectedChips('riesgosToggle'),
+      supermercadosCercanos: val('ent_supers'),
+      farmaciasCercanas: val('ent_farmacias'),
+      hospitalCercano: { nombre: val('ent_hospital_nombre'), distancia: val('ent_hospital_distancia') },
+      vecinosConfianza: val('ent_vecinos'),
+    },
+    preferencias: {
+      escenarioPreocupante: val('pref_escenario'),
+      peticionesEspecificas: val('pref_peticiones'),
+      mascotas: collectMascotas(),
+    },
+  };
+
+  if (activeModules.has('bebe')) {
+    data.moduloBebe = {
+      alimentacion: val('bebe_alimentacion_tipo'),
+      alimentosEspecificos: val('bebe_alimentos') || undefined,
+      panales: val('bebe_panales') || undefined,
+      portabebes: val('bebe_portabebes') || undefined,
+      sillaCoche: val('bebe_silla') || undefined,
+      guarderia: val('bebe_guarderia_nombre') ? {
+        nombre: val('bebe_guarderia_nombre'),
+        direccion: val('bebe_guarderia_dir'),
+        telefono: val('bebe_guarderia_tel'),
+      } : null,
+      cuidadoresAlternativos: collectCuidadores(),
+      medicacionInfantil: val('bebe_medicacion') || undefined,
+      pediatra: { nombre: val('bebe_pediatra_nombre'), telefono: val('bebe_pediatra_tel') },
+      rutinaSueno: val('bebe_rutina') || undefined,
+    };
+  }
+
+  if (activeModules.has('mayores')) {
+    data.moduloMayores = {
+      movilidad: val('may_movilidad'),
+      medicacionDetallada: collectMedicacion(),
+      aparatosElectricosMedicos: collectAparatos(),
+      deterioroCognitivo: val('may_cognitivo') || undefined,
+      capacidadEvacuacion: val('may_evacuacion') || undefined,
+      cuidadorPrincipal: val('may_cuidador') || undefined,
+      centroSalud: { nombre: val('may_centro_nombre'), telefono: val('may_centro_tel'), direccion: val('may_centro_dir') },
+      dependencia: val('may_dependencia') || undefined,
+    };
+  }
+
+  if (activeModules.has('jovenes')) {
+    data.moduloJovenes = {
+      autonomia: val('jov_autonomia'),
+      movilPropio: valBool('jov_movil') ?? false,
+      conocimientos: splitCSV(val('jov_conocimientos')),
+      horarios: val('jov_horarios') || undefined,
+      carnet: valBool('jov_carnet') ?? false,
+      rolActivo: val('jov_rol') || undefined,
+      centroEstudios: { nombre: val('jov_centro_nombre'), direccion: val('jov_centro_dir'), telefono: val('jov_centro_tel') },
+    };
+  }
+
+  return data;
+}
+
+// ─── Review ───
+function buildReview() {
+  const data = buildJSON();
+  const el = document.getElementById('reviewSummary');
+
+  const miembrosHtml = data.miembros.length
+    ? data.miembros.map(m => `<li><strong>${m.nombre}</strong> — ${m.edad} años, ${m.parentesco}${m.medicacionFija ? ' <em style="color:var(--text-light)">(con medicación)</em>' : ''}${m.condicionesMedicas ? ' <em style="color:var(--text-light)">(con condiciones médicas)</em>' : ''}</li>`).join('')
+    : '<li class="review-warning">No has añadido ningún miembro</li>';
+
+  const movilesHtml = data.comunicaciones.moviles.length
+    ? data.comunicaciones.moviles.map(m => `<li>${m.nombre}: <strong>${m.numero}</strong>${m.operador ? ` (${m.operador})` : ''}</li>`).join('')
+    : '<li class="review-warning">No has añadido ningún teléfono</li>';
+
+  let modulesHtml = '';
+  if (activeModules.size > 0) {
+    const labels = { bebe: 'Bebés', mayores: 'Mayores', jovenes: 'Jóvenes' };
+    const colors = { bebe: '#dbeafe', mayores: '#fef3c7', jovenes: '#dcfce7' };
+    modulesHtml = Array.from(activeModules).map(m =>
+      `<span style="background:${colors[m]};padding:3px 10px;border-radius:6px;font-size:0.85rem;">${labels[m]}</span>`
+    ).join(' ');
+  }
+
+  const vehiculosText = data.transporte.vehiculos.length
+    ? data.transporte.vehiculos.map(v => `${v.modelo || v.tipo} (${v.plazas} plazas)`).join(', ')
+    : 'Ninguno';
+
+  el.innerHTML = `
+    <div class="review-block">
+      <h4>Núcleo</h4>
+      <p><strong>${data.nombre || '<span class="review-warning">Sin nombre</span>'}</strong></p>
+      ${modulesHtml ? '<p style="margin-top:8px;">' + modulesHtml + '</p>' : ''}
+    </div>
+    <div class="review-block">
+      <h4>Miembros (${data.miembros.length})</h4>
+      <ul style="margin-left: 18px; font-size: 0.9rem;">${miembrosHtml}</ul>
+    </div>
+    <div class="review-block">
+      <h4>Vivienda</h4>
+      <p>${data.vivienda.direccion || '<span class="review-warning">Sin dirección</span>'} — ${data.vivienda.tipo || '?'}</p>
+    </div>
+    <div class="review-block">
+      <h4>Transporte</h4>
+      <p>Vehículos: ${vehiculosText} &nbsp;|&nbsp; Conductores: ${data.transporte.conductores.join(', ') || 'Ninguno'} &nbsp;|&nbsp; Bicicletas: ${data.transporte.bicicletas}</p>
+    </div>
+    <div class="review-block">
+      <h4>Teléfonos (${data.comunicaciones.moviles.length})</h4>
+      <ul style="margin-left: 18px; font-size: 0.9rem;">${movilesHtml}</ul>
+    </div>
+    <div class="review-block">
+      <h4>Apps de mensajería</h4>
+      <p>${data.comunicaciones.apps.length ? data.comunicaciones.apps.join(', ') : '<span class="review-warning">Ninguna seleccionada</span>'}</p>
+    </div>`;
+}
+
+// ─── Submit ───
+async function submitForm() {
+  const data = buildJSON();
+
+  // Validation
+  if (!data.nombre) { alert('Falta el nombre de vuestra familia. Ve al primer paso.'); goToStep(0); return; }
+  if (data.miembros.length === 0) { alert('Añade al menos un miembro del hogar.'); goToStep(1); return; }
+  if (!data.vivienda.direccion) { alert('Falta la dirección de la vivienda.'); goToStep(2); return; }
+  if (data.comunicaciones.moviles.length === 0) { alert('Añade al menos un teléfono móvil.'); goToStep(6); return; }
+
+  // Disable button while sending
+  const btn = document.getElementById('btnNext');
+  const originalText = btn.textContent;
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+  document.getElementById('submitError').style.display = 'none';
+
+  try {
+    const cleaned = JSON.parse(JSON.stringify(data));
+    const resp = await fetch('/api/enviar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cleaned),
+    });
+
+    const result = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(result.error || 'Error al enviar.');
+    }
+
+    // Success
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.querySelector('[data-step="success"]').style.display = 'block';
+    document.querySelector('[data-step="success"]').classList.add('active');
+    currentStep = 'success';
+    updateUI();
+
+  } catch (err) {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    const errorEl = document.getElementById('submitError');
+    const errorMsg = document.getElementById('submitErrorMsg');
+    errorMsg.textContent = 'No se ha podido enviar el formulario. Comprueba tu conexión a internet e inténtalo de nuevo. Si el problema persiste, contacta con el coordinador.';
+    errorEl.style.display = 'block';
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+// ─── Init ───
+addMiembro();
+addMovil();
+updateUI();
+</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel del Coordinador</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 6px; }
+    .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 30px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+      border-left: 4px solid #16a34a;
+    }
+    .card.expiring {
+      border-left-color: #f59e0b;
+    }
+    .card.expired {
+      border-left-color: #dc2626;
+    }
+    .card .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .card .id {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #2563eb;
+      margin-right: 12px;
+    }
+    .card .nombre { font-weight: 600; }
+    .card .meta {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    .card .meta span { margin-right: 14px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-bebe { background: #dbeafe; color: #1d4ed8; }
+    .badge-mayores { background: #fef3c7; color: #92400e; }
+    .badge-jovenes { background: #dcfce7; color: #166534; }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-ok { background: #dcfce7; color: #166534; }
+    .status-expiring { background: #fef3c7; color: #92400e; }
+    .status-expired { background: #fef2f2; color: #991b1b; }
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #94a3b8;
+    }
+    .empty p { font-size: 1.1rem; margin-bottom: 8px; }
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .stat-card .num {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+    .stat-card .label { color: #64748b; font-size: 0.82rem; }
+    .num-ok { color: #16a34a; }
+    .num-expiring { color: #f59e0b; }
+    .num-expired { color: #dc2626; }
+    .refresh-btn {
+      padding: 8px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      background: white;
+      font-family: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      color: #64748b;
+    }
+    .refresh-btn:hover { border-color: #2563eb; color: #2563eb; }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    @media (max-width: 500px) {
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-row">
+      <div>
+        <h1>Panel del Coordinador</h1>
+        <p class="subtitle">Formularios recibidos de los núcleos familiares</p>
+      </div>
+      <button class="refresh-btn" onclick="load()">Actualizar</button>
+    </div>
+    <div id="content"></div>
+  </div>
+
+  <script>
+    const MONTHS_TO_EXPIRE = 6;
+    const MONTHS_TO_WARN = 5; // warn 1 month before expiry
+
+    function getStatus(fechaEnvio) {
+      const now = new Date();
+      const sent = new Date(fechaEnvio);
+      const diffMs = now - sent;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffMonths = diffDays / 30.44; // average days per month
+
+      if (diffMonths >= MONTHS_TO_EXPIRE) {
+        return { status: 'expired', label: 'Caducado', days: diffDays };
+      } else if (diffMonths >= MONTHS_TO_WARN) {
+        const remaining = Math.ceil((MONTHS_TO_EXPIRE * 30.44) - diffDays);
+        return { status: 'expiring', label: `Caduca en ${remaining} días`, days: diffDays };
+      } else {
+        return { status: 'ok', label: 'Vigente', days: diffDays };
+      }
+    }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function timeAgo(days) {
+      if (days === 0) return 'hoy';
+      if (days === 1) return 'ayer';
+      if (days < 30) return `hace ${days} días`;
+      const months = Math.floor(days / 30);
+      if (months === 1) return 'hace 1 mes';
+      return `hace ${months} meses`;
+    }
+
+    async function load() {
+      const el = document.getElementById('content');
+      try {
+        const resp = await fetch('/api/estado');
+        const nucleos = await resp.json();
+
+        if (nucleos.length === 0) {
+          el.innerHTML = `
+            <div class="empty">
+              <p>Todavía no se ha recibido ningún formulario.</p>
+              <p style="font-size: 0.9rem;">Envía el enlace del formulario a los núcleos familiares y espera a que lo rellenen.</p>
+            </div>`;
+          return;
+        }
+
+        // Compute statuses
+        const withStatus = nucleos.map(n => ({
+          ...n,
+          ...getStatus(n.fechaEnvio),
+        }));
+
+        const countOk = withStatus.filter(n => n.status === 'ok').length;
+        const countExpiring = withStatus.filter(n => n.status === 'expiring').length;
+        const countExpired = withStatus.filter(n => n.status === 'expired').length;
+
+        const badgeLabels = { bebe: 'Bebés', mayores: 'Mayores', jovenes: 'Jóvenes' };
+        const badgeClass = { bebe: 'badge-bebe', mayores: 'badge-mayores', jovenes: 'badge-jovenes' };
+        const statusBadgeClass = { ok: 'status-ok', expiring: 'status-expiring', expired: 'status-expired' };
+
+        // Sort: expired first, then expiring, then ok. Within each group, by ID.
+        withStatus.sort((a, b) => {
+          const order = { expired: 0, expiring: 1, ok: 2 };
+          const diff = order[a.status] - order[b.status];
+          if (diff !== 0) return diff;
+          return a.id.localeCompare(b.id, undefined, { numeric: true });
+        });
+
+        let html = `
+          <div class="stats">
+            <div class="stat-card">
+              <div class="num num-ok">${countOk}</div>
+              <div class="label">Vigentes</div>
+            </div>
+            <div class="stat-card">
+              <div class="num num-expiring">${countExpiring}</div>
+              <div class="label">Por caducar</div>
+            </div>
+            <div class="stat-card">
+              <div class="num num-expired">${countExpired}</div>
+              <div class="label">Caducados</div>
+            </div>
+          </div>
+          <div class="legend">
+            <span><span class="legend-dot" style="background:#16a34a"></span> Menos de 5 meses</span>
+            <span><span class="legend-dot" style="background:#f59e0b"></span> 5-6 meses</span>
+            <span><span class="legend-dot" style="background:#dc2626"></span> Más de 6 meses</span>
+          </div>`;
+
+        for (const n of withStatus) {
+          const badges = (n.modulos || []).map(m =>
+            `<span class="badge ${badgeClass[m] || ''}">${badgeLabels[m] || m}</span>`
+          ).join(' ');
+
+          html += `
+            <div class="card ${n.status === 'ok' ? '' : n.status}">
+              <div class="top-row">
+                <div>
+                  <div><span class="id">${n.id}</span><span class="nombre">${n.nombre}</span></div>
+                  <div class="meta">
+                    <span>${n.miembros} miembro${n.miembros !== 1 ? 's' : ''}</span>
+                    <span>Enviado ${formatDate(n.fechaEnvio)} (${timeAgo(n.days)})</span>
+                    ${badges}
+                  </div>
+                </div>
+                <span class="status-badge ${statusBadgeClass[n.status]}">${n.label}</span>
+              </div>
+            </div>`;
+        }
+
+        el.innerHTML = html;
+      } catch (err) {
+        el.innerHTML = `<div class="empty"><p>Error al cargar los datos.</p></div>`;
+      }
+    }
+
+    load();
+    setInterval(load, 30000);
+  </script>
+</body>
+</html>
